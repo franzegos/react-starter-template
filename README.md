@@ -15,15 +15,21 @@ Starter for React apps: Vite, TypeScript, Tailwind CSS v4, shadcn/ui (new-york),
 ```
 src/
   api/
-    client.ts
-    queries/use-demo.ts    # query key + hook (e.g. useDemoPost)
+    client.ts                 # default + named `api` export
+    config.ts                 # getAPIBaseURL() from VITE_API_URL
+    schema/demo.schema.ts     # Zod + z.infer types (example)
+    queries/use-demo.ts
+    queries/use-auth.ts       # stub useAuthAccessToken — replace when adding auth
+    queries/use-authenticated-query.ts
     services/demo.ts
-    types/demo.types.ts
+    types/global.types.ts     # ApiSuccess<T>, ApiErrorBody
+    types/demo.types.ts       # re-exports DTOs aligned with schema
   components/
     ErrorBoundary.tsx
+    guards/ProtectedRoute.tsx
     ui/                       # shadcn — kebab-case filenames
   lib/
-    hooks/                    # app hooks (use*.ts), when you add them
+    hooks/use-is-client.ts   # example app hook (`useSyncExternalStore`, ESLint-safe)
     providers/AppProviders.tsx, ThemeRoot.tsx
     stores/themeStore.ts, counterStore.ts
     utils/cn.ts, index.ts     # @/lib/utils → cn()
