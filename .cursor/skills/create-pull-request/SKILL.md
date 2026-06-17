@@ -85,12 +85,13 @@ Plain-language manual QA steps for reviewers. Dev verification belongs under **S
 
 **Do not** check GitHub PR CI status after opening a PR. Do not run `gh pr checks`, poll GitHub Actions, or wait for Vercel deploy results.
 
-**Before** `gh pr create`, run local verification when the diff touches `src/` (not docs-only):
+**Before** `gh pr create`, run local verification (same gates as CI). `commit-changes` should already have run `pnpm verify`; re-run if commits landed after the last verify:
 
 ```bash
-pnpm exec tsc -b --noEmit
-pnpm test:run
+pnpm verify
 ```
+
+For docs-only PRs (no `src/` changes): at minimum `pnpm format:check` and `pnpm lint`.
 
 Paste results under **Screenshots/evidence**. Leave **Verification Proof** checkboxes unchecked unless the user confirmed locally.
 
@@ -99,19 +100,15 @@ Paste results under **Screenshots/evidence**. Leave **Verification Proof** check
 ```markdown
 **Screenshots/evidence (if applicable):**
 
-### Typecheck
+### Local verify (CI mirror)
 
 \`\`\`text
-$ pnpm exec tsc -b --noEmit
-(exit 0)
-\`\`\`
-
-### Unit tests
-
-\`\`\`text
-$ pnpm test:run
-Test Files N passed (N)
-Tests N passed (N)
+$ pnpm verify
+format:check — pass
+lint — pass
+tsc -b --noEmit — pass
+test:run — N passed
+build — pass
 (exit 0)
 \`\`\`
 
@@ -128,7 +125,7 @@ New/changed test files:
 - [ ] 3. Auto-branch if current branch == base
 - [ ] 4. Auto-commit if working tree dirty
 - [ ] 5. Re-inspect log + diff vs base
-- [ ] 6. Run typecheck + tests; capture evidence block
+- [ ] 6. Run `pnpm verify`; capture evidence block
 - [ ] 7. Draft PR title + body
 - [ ] 8. Preview — wait for approval
 - [ ] 9. Push if needed
@@ -155,5 +152,5 @@ EOF
 ## Out of scope
 
 - Auto labels/reviewers, draft PRs
-- **PR CI status** — local `pnpm test:run` (+ typecheck) is sufficient
+- **PR CI status** — local `pnpm verify` is sufficient
 - Splitting across PRs (user's split-to-prs skill)

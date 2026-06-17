@@ -14,12 +14,14 @@ cp .env.example .env
 pnpm dev
 ```
 
-| Command             |                              |
-| ------------------- | ---------------------------- |
-| `pnpm build`        | typecheck + production build |
-| `pnpm test:run`     | Vitest once                  |
-| `pnpm lint`         | ESLint                       |
-| `pnpm format:check` | Prettier check               |
+| Command             |                                    |
+| ------------------- | ---------------------------------- |
+| `pnpm verify`       | same gates as CI (run before push) |
+| `pnpm build`        | typecheck + production build       |
+| `pnpm test:run`     | Vitest once                        |
+| `pnpm lint`         | ESLint                             |
+| `pnpm format`       | Prettier write                     |
+| `pnpm format:check` | Prettier check                     |
 
 ---
 
@@ -64,9 +66,9 @@ PR body uses `.github/PULL_REQUEST_TEMPLATE.md` (not Cursor's global PR format).
 
 ### Rules
 
-| Scope            | Rules                                                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------------------- |
-| **Always apply** | `naming-conventions`, `repo-agent-skills`                                                                     |
+| Scope            | Rules                                                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Always apply** | `naming-conventions`, `repo-agent-skills`                                                                                           |
 | **File-scoped**  | `api-layer`, `icons-and-assets`, `interaction-polish`, `react-state-zustand`, `shadcn-ui-usage`, `vitest-testing`, `zod-validation` |
 
 Details: `.cursor/rules/`. Always-on rules use more tokens per request — tune in Cursor rule settings.

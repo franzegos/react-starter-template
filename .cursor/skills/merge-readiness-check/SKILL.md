@@ -186,14 +186,18 @@ In the verdict: **Pass** or **Fail** — list each violation with **rule file + 
 
 **Do not** check GitHub PR CI status. Do not run `gh pr checks`, poll GitHub Actions, or wait for Vercel deploy results.
 
-When the diff includes `src/api/`, `src/lib/`, or high-risk UI:
+Run the full local CI mirror when the diff is not trivially docs-only:
 
 ```bash
-pnpm exec tsc -b --noEmit
-pnpm test:run
+pnpm verify
 ```
 
-Also consider `pnpm build` if types/routes changed.
+For docs-only changes (`.md`, `.mdc` skills/rules with no `src/` changes), at minimum:
+
+```bash
+pnpm format:check
+pnpm lint
+```
 
 Per `vitest-testing.mdc`: new/changed modules should have matching tests under `src/test/`. Flag missing tests for non-trivial logic.
 
@@ -256,9 +260,7 @@ Lead with **what changed since last review**, then **what still blocks merge**, 
 
 ### Verification done
 
-- [ ] `pnpm exec tsc -b --noEmit` — pass / fail / not run
-- [ ] `pnpm test:run` — pass / fail / not run
-- [ ] `pnpm build` — pass / fail / not run (optional)
+- [ ] `pnpm verify` — pass / fail / not run (docs-only: `format:check` + `lint` minimum)
 - PR CI status — **not checked**
 ```
 

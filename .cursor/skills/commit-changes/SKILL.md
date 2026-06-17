@@ -69,15 +69,33 @@ docs: document vitest file mapping in cursor rules
 
 Warn on likely credentials not gitignored.
 
+## Pre-commit verify (required)
+
+Run **before** `git commit` so local work matches [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml). **Do not commit** if verify fails — fix issues first.
+
+```bash
+pnpm format:check || pnpm format
+# If format wrote files, re-stage the paths you are committing:
+git add -- <paths>
+pnpm verify
+```
+
+`pnpm verify` runs: `format:check` → `lint` → `tsc -b --noEmit` → `test:run` → `build`.
+
+- **Format failures:** run `pnpm format`, re-stage affected files, then `pnpm verify` again.
+- **Docs-only commits** still need `format:check` (README tables and `.md` files are checked).
+- If verify cannot be run (missing `node_modules`), run `pnpm install` first.
+
 ## Workflow
 
 ```
 - [ ] 1. Inspect (status, diff, log, branch)
 - [ ] 2. Draft Conventional Commit message
 - [ ] 3. Stage safe files
-- [ ] 4. Show staged list + message
-- [ ] 5. git commit (HEREDOC)
-- [ ] 6. git status
+- [ ] 4. Pre-commit verify (format + pnpm verify)
+- [ ] 5. Show staged list + message + verify result
+- [ ] 6. git commit (HEREDOC)
+- [ ] 7. git status
 ```
 
 ```bash

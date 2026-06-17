@@ -13,6 +13,7 @@
     "build": "tsc -b && vite build",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
+    "verify": "pnpm format:check && pnpm lint && pnpm exec tsc -b --noEmit && pnpm test:run && pnpm build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest",
