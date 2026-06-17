@@ -1,0 +1,49 @@
+---
+description: Vitest tests for lib, schema, services, and queries when adding or changing API/features
+globs: src/api/**/*,src/lib/**/*,src/test/**/*
+alwaysApply: false
+---
+
+# Vitest testing
+
+Follow this when adding or changing code under `src/lib/`, `src/api/`, or high-risk UI flows.
+
+## File mapping
+
+Every new/changed module gets a matching test under `src/test/` (same relative path + `.test.ts` or `.test.tsx`):
+
+- `src/lib/orders/formatOrderTotal.ts` → `src/test/lib/orders/formatOrderTotal.test.ts`
+- `src/api/services/orders.ts` → `src/test/api/services/orders.test.ts`
+- `src/api/queries/use-orders.ts` → `src/test/api/queries/use-orders.test.ts`
+
+**Skip test files** for types-only modules, barrel `index.ts`, and static `src/lib/constants/*`.
+
+## Pipeline (mirror api-layer)
+
+1. Types (no test file)
+2. **Schema** — Zod parse tests, no mocks
+3. **Service** — `vi.mock('@/api/client')`, assert URL/method/body; see `src/test/api/services/demo.test.ts`
+4. **Query** — `vi.mock` services + `makeQueryWrapper()` from `src/test/helpers/queryWrapper.ts`; see `src/test/api/queries/use-demo.test.ts`
+5. **Lib** — pure mappers/messages, no mocks
+6. **High-risk UI** (auth, checkout, onboarding, multi-step wizards) — `src/test/components/`, `src/test/pages/`, or `src/test/providers/` with mocked queries; use `renderWithProviders()` from `src/test/helpers/renderWithProviders.tsx`
+
+## Complete reference (copy for new API work)
+
+End-to-end golden example — **every service function + every hook**:
+
+- Service: `src/test/api/services/demo.test.ts` → `src/api/services/demo.ts`
+- Query: `src/test/api/queries/use-demo.test.ts` → `src/api/queries/use-demo.ts`
+- Schema: `src/test/api/schema/demo.schema.test.ts`
+
+Per export, include at minimum:
+
+- **Service**: happy path (URL/method/body) + rethrow on error
+- **Query hook**: success + service error; mutations also assert `mutateAsync` args
+- **Schema**: valid parse + one invalid case per constraint
+
+## Rules
+
+- Do **not** call real `VITE_API_URL` in unit tests.
+- Prefer table-driven `it` cases over snapshots for pages.
+- `pnpm test:run` must pass before merge; replace `it.todo` with real tests in files you touch.
+- Heavy business logic that belongs on the backend should be tested there; the webapp tests cover **display mapping** and client behavior only.

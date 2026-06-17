@@ -13,6 +13,23 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    globals: false,
     setupFiles: ["./src/test/setup.ts"],
+    include: ["src/test/**/*.{test,spec}.{ts,tsx}"],
+    coverage: {
+      provider: "v8",
+      include: [
+        "src/lib/**",
+        "src/api/schema/**",
+        "src/api/services/**",
+        "src/api/queries/**",
+      ],
+      exclude: [
+        "src/test/**",
+        "src/**/*.{test,spec}.{ts,tsx}",
+        "**/*.types.ts",
+        "src/**/index.ts",
+      ],
+    },
   },
 });

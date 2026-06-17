@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Naming Conventions
@@ -24,10 +24,10 @@ Follow these conventions for all new and renamed files and constants.
 
 ### API query hooks (`src/api/queries/`)
 
-| Scope                              | Folder                          | File name          | Exported hook (examples)                    |
-| ---------------------------------- | ------------------------------- | ------------------ | ------------------------------------------- |
-| **Cross-cutting** (auth, utils)    | `queries/` root                 | `use-<feature>.ts` | `useAuthSync`, `useAuthMe`                  |
-| **Surface-specific** (if you use segments) | `queries/<segment>/`     | `use-<feature>.ts` | `useAdminDashboard` (from `use-dashboard.ts`) |
+| Scope                                      | Folder               | File name          | Exported hook (examples)                      |
+| ------------------------------------------ | -------------------- | ------------------ | --------------------------------------------- |
+| **Cross-cutting** (auth, utils)            | `queries/` root      | `use-<feature>.ts` | `useAuthSync`, `useAuthMe`                    |
+| **Surface-specific** (if you use segments) | `queries/<segment>/` | `use-<feature>.ts` | `useAdminDashboard` (from `use-dashboard.ts`) |
 
 Rules:
 
@@ -37,20 +37,20 @@ Rules:
 
 ## API services (`src/api/services/`)
 
-| Scope              | Example path                                | File name                          |
-| ------------------ | ------------------------------------------- | ---------------------------------- |
-| Cross-cutting      | `services/auth.ts`, `services/users.ts`     | `<domain>.ts` or existing name     |
-| Segment (optional) | `services/admin/reports.ts`                 | kebab-case or short domain name    |
+| Scope              | Example path                            | File name                       |
+| ------------------ | --------------------------------------- | ------------------------------- |
+| Cross-cutting      | `services/auth.ts`, `services/users.ts` | `<domain>.ts` or existing name  |
+| Segment (optional) | `services/admin/reports.ts`             | kebab-case or short domain name |
 
 - **Functions:** `camelCase` — `getDashboard`, `postAuthSync`.
 - Do **not** prefix the filename with the segment when it already sits under `services/<segment>/`.
 
 ## API types (`src/api/types/`)
 
-| Scope              | Example path                                           |
-| ------------------ | ------------------------------------------------------ |
-| Cross-cutting      | `types/global.types.ts`, `types/auth.types.ts`       |
-| Segment (optional) | `types/admin/reports.types.ts`                         |
+| Scope              | Example path                                   |
+| ------------------ | ---------------------------------------------- |
+| Cross-cutting      | `types/global.types.ts`, `types/auth.types.ts` |
+| Segment (optional) | `types/admin/reports.types.ts`                 |
 
 - **File name:** `<feature>.types.ts` (kebab-case or camelCase **feature** segment; stay consistent within the folder).
 - **Type names:** PascalCase — `DashboardData`, `AuthMeData`.
@@ -68,7 +68,7 @@ Rules:
 
 ## Providers (React context / app wrappers)
 
-- **Location:** `src/providers/` or `src/lib/providers/` (e.g. TanStack Query)
+- **Location:** `src/providers/` (e.g. TanStack Query, auth, theme)
 - **Convention:** PascalCase for component files (e.g. `AuthProvider.tsx`, `QueryProvider.tsx`)
 
 ## Constants
@@ -82,8 +82,10 @@ Rules:
 
 ## Page structure (colocate page-specific components)
 
-- Prefer **page folder + index**: `pages/<area>/<PageName>/index.tsx` plus page-specific components in the same folder. That keeps page-only UI out of `src/components/`.
-- **One folder per URL area** when routes share a base path — do not split list vs detail vs modals into many sibling folders for the same feature (e.g. one `pages/app/orders/` tree with `OrdersPage.tsx`, `OrderDetailPage.tsx`, colocated modals).
+- **Folders under `src/pages/` are lowercase** (or kebab-case for multi-word routes) — e.g. `pages/creator/account/`, `pages/home/`, `pages/public/`. **Do not** use PascalCase folders like `pages/HomePage/`.
+- **Page component files** are PascalCase and live in the route folder — e.g. `pages/home/HomePage.tsx`, `pages/creator/account/AccountPage.tsx`.
+- **`index.tsx`** is optional when a page has many colocated children — e.g. `pages/shared/referral/ReferralPage/index.tsx` (folder name may match the page for that pattern only).
+- **One folder per URL area** when routes share a base path — colocate list, detail, and modals (e.g. `pages/app/orders/OrdersPage.tsx`, `OrderDetailPage.tsx`).
 - **Page-only helpers** — Pure functions unlikely to be reused may stay in the page file **below** the default export, using `function helperName() { ... }`. Types used only by that page usually sit **above** the component. **Reusable** logic belongs under **`src/lib/<domain>/`**; **prefer extending an existing related file** before adding a new `lib/<domain>/*.ts` module.
 
 ## Folders
@@ -91,26 +93,23 @@ Rules:
 - Use **lowercase** for single words: `admin`, `app`, `utils`, `hooks`
 - Use **kebab-case** for multi-word folders when helpful (`payment-methods`, `mock-data`)
 - Under `src/api/`, **segment folder names** should match your API and stay **consistent** (singular vs plural — pick one convention per project).
-
-## Assets (images, icons, SVGs)
-
-- **Convention:** kebab-case
-- **Examples:** `logo-dark.svg`, `hero-placeholder.png`
-- **Applies to:** Files under `assets/` (group by topic: `assets/icons/`, etc.)
+- **Static asset file names** under `src/assets/` — kebab-case (e.g. `logo-dark.svg`). Icon and SVG *usage* — see `icons-and-assets.mdc`.
 
 ## Quick Reference
 
-| Type                                                       | Convention                                      | Example                    |
-| ---------------------------------------------------------- | ----------------------------------------------- | -------------------------- |
-| Page / layout / component (`.tsx`, except `components/ui`) | PascalCase                                      | `OrdersPage.tsx`           |
-| API query file (cross-cutting)                             | `use-<kebab>.ts` at `api/queries/`               | `use-auth.ts`              |
-| API query file (segment)                                   | `use-<kebab>.ts` under `api/queries/<segment>/` | `admin/use-dashboard.ts`   |
-| API service (segment)                                      | `<domain>.ts` under `api/services/<segment>/`   | `admin/reports.ts`         |
-| API types (segment)                                        | `<feature>.types.ts` under `api/types/<segment>/` | `admin/reports.types.ts` |
-| Hook files (app, `lib/hooks`)                              | `use-<kebab>.ts`                                | `use-auth.ts`              |
-| Type modules                                               | `<name>.types.ts`                               | `auth.types.ts`            |
-| Utility / logic (`.ts`)                                    | camelCase                                       | `mockData.ts`              |
-| Domain helpers (`lib/<domain>/`)                           | camelCase                                       | `buildCheckoutPayload.ts`  |
-| Constants                                                  | UPPER_SNAKE_CASE                                | `MAX_RETRIES`              |
-| Folders                                                    | lowercase / kebab-case                          | `admin`, `payment-methods` |
-| Assets (images, icons)                                     | kebab-case                                      | `logo-dark.svg`            |
+| Type                                                       | Convention                                        | Example                    |
+| ---------------------------------------------------------- | ------------------------------------------------- | -------------------------- |
+| Page folders (`src/pages/`)                                | lowercase / kebab-case                            | `home`, `creator/account`  |
+| Page component files                                       | PascalCase                                        | `HomePage.tsx`             |
+| Layout / component (`.tsx`, except `components/ui`)        | PascalCase                                        | `AppSidebar.tsx`           |
+| API query file (cross-cutting)                             | `use-<kebab>.ts` at `api/queries/`                | `use-auth.ts`              |
+| API query file (segment)                                   | `use-<kebab>.ts` under `api/queries/<segment>/`   | `admin/use-dashboard.ts`   |
+| API service (segment)                                      | `<domain>.ts` under `api/services/<segment>/`     | `admin/reports.ts`         |
+| API types (segment)                                        | `<feature>.types.ts` under `api/types/<segment>/` | `admin/reports.types.ts`   |
+| Hook files (app, `lib/hooks`)                              | `use-<kebab>.ts`                                  | `use-auth.ts`              |
+| Type modules                                               | `<name>.types.ts`                                 | `auth.types.ts`            |
+| Utility / logic (`.ts`)                                    | camelCase                                         | `mockData.ts`              |
+| Domain helpers (`lib/<domain>/`)                           | camelCase                                         | `buildCheckoutPayload.ts`  |
+| Constants                                                  | UPPER_SNAKE_CASE                                  | `MAX_RETRIES`              |
+| Folders                                                    | lowercase / kebab-case                            | `admin`, `payment-methods` |
+| Static assets (`src/assets/`)                              | kebab-case filenames                              | `logo-dark.svg`            |

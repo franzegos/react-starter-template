@@ -71,8 +71,6 @@ export class ErrorBoundary extends Component<Props, State> {
       );
     }
 
-    return (
-      <Fragment key={this.state.resetKey}>{this.props.children}</Fragment>
-    );
+    return <Fragment key={this.state.resetKey}>{this.props.children}</Fragment>;
   }
 }

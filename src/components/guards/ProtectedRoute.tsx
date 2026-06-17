@@ -5,7 +5,10 @@ type ProtectedRouteProps = {
   fallback?: React.ReactNode;
 };
 
-/** Layout/route guard — wire `isAllowed` to auth when you add it (no router required). */
+/**
+ * Route guard shell — wire `isAllowed` to your auth layer when you add one.
+ * Auth patterns differ per project (cookies, JWT, OAuth, etc.); not included in this template.
+ */
 export function ProtectedRoute({
   children,
   isAllowed,

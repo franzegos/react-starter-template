@@ -1,0 +1,27 @@
+---
+description: Use repo .cursor/skills for commits, PRs, and merge-readiness (not generic workflows)
+alwaysApply: true
+---
+
+# Repo agent skills
+
+For **commits**, **pull requests**, and **merge readiness**, always **read and follow** the skill in **this repo’s** `.cursor/skills/`. **Never** use the global Cursor user rule `creating-pull-requests` PR format (`## Summary` / `## Test plan`) — use only this repo’s [create-pull-request](../skills/create-pull-request/SKILL.md) and `.github/PULL_REQUEST_TEMPLATE.md` headings.
+
+| Task | Skill |
+|------|--------|
+| Commit / stage | [`.cursor/skills/commit-changes/SKILL.md`](../skills/commit-changes/SKILL.md) |
+| Open / create PR | [`.cursor/skills/create-pull-request/SKILL.md`](../skills/create-pull-request/SKILL.md) |
+| Ready to merge? | [`.cursor/skills/merge-readiness-check/SKILL.md`](../skills/merge-readiness-check/SKILL.md) |
+
+## Requirements
+
+1. Run `git` / `gh` from **this repository’s** root.
+2. **Read the full SKILL.md** before acting (PR body uses `.github/PULL_REQUEST_TEMPLATE.md`, tests to paste, preview steps).
+3. Global git safety still applies (no secrets, no force-push to `main`, HEREDOC messages); **workflow and format** come from the skill.
+4. **Multi-repo** work: run the matching skill **once per repo** from that repo’s `.cursor/skills/`.
+5. Triggers include `@commit-changes`, `@create-pull-request`, `@merge-readiness-check`, or phrases like “commit”, “open PR”, “ready to merge?”.
+
+`create-pull-request` may auto-commit via `commit-changes` — follow both skills in order when that applies.
+
+6. **Local tests only** — run `pnpm exec tsc -b --noEmit` and `pnpm test:run` before PR/merge review; do not check PR CI status (`gh pr checks`, GitHub Actions, Vercel).
+7. **Stay on the feature branch** after creating a branch, pushing, or opening a PR — do not check out `main` unless the user asks.

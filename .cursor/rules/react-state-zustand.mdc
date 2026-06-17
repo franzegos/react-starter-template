@@ -1,5 +1,5 @@
 ---
-alwaysApply: false
+alwaysApply: true
 ---
 
 # React local state vs Zustand
@@ -31,6 +31,25 @@ Avoid growing a single god-store; split domains (`authStore`, `uiLayoutStore`, e
 
 - If a value can be computed from current props or state, **derive it during render** instead of storing it in state and syncing with `useEffect`. That avoids extra renders and state drifting out of sync with sources of truth.
 - Do not set state in an effect **only** because props changed when a derived expression, `key` reset, or lifting state fixes the model. See [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect).
+
+## Avoid effect-heavy pages
+
+A common smell in vibe-coded UIs: **one page component with many `useEffect`s** syncing props, query results, or URL params into local state.
+
+Before adding `useEffect` to a page or layout, ask:
+
+1. Can this be **derived during render**?
+2. Can this run in an **event handler** (submit, click, navigation)?
+3. Should **TanStack Query** own it (`data`, `isPending`, `mutate`) instead of copying into `useState`?
+4. Will a **`key`** on a child reset local UI without an effect?
+
+**Red flags** (refactor or push logic down):
+
+- Multiple effects in `src/pages/**` that only call `setState` when props/query data changes
+- Effects that **fetch** or **mutate server state** — belong in query hooks / services
+- Chains of effects where one effect’s state triggers another effect
+
+Prefer **small hooks under `src/lib/hooks/`** or **query modules** over growing effect chains in page files. Pages should mostly compose hooks and render.
 
 ## `useState` patterns
 
