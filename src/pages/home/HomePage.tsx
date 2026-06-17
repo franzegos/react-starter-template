@@ -48,7 +48,7 @@ export function HomePage() {
         <header className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">
-              cursor-frontend-template
+              personal-ai-frontend-template
             </h1>
             <p className="text-muted-foreground text-sm">
               Personal webapp frontend template

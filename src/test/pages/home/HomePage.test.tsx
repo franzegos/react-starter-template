@@ -24,7 +24,7 @@ describe("HomePage", () => {
     );
 
     expect(
-      screen.getByRole("heading", { name: "cursor-frontend-template" }),
+      screen.getByRole("heading", { name: "personal-ai-frontend-template" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText("Personal webapp frontend template"),
