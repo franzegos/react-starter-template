@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Async UI & race conditions
 
-See also: **`api-layer.mdc`**, **`data-ownership.mdc`**, **`interaction-polish.mdc`** (§14 optimistic UI), **`performance.mdc`**.
+See also: **`api-layer.mdc`**, **`data-ownership.mdc`**, **`interaction-polish.mdc`** (§14 optimistic UI), **`performance.mdc`**, **`feature-state.mdc`**, **`offline-reconnect.mdc`**.
 
 Race conditions and stale responses are among the most common AI-generated frontend bugs — especially search, autocomplete, filters, pagination, and tab switches.
 
@@ -24,7 +24,7 @@ Race conditions and stale responses are among the most common AI-generated front
 TanStack Query passes an **`AbortSignal`** to `queryFn`. Forward it to the HTTP client:
 
 ```typescript
-// src/api/services/users.ts
+// src/api/features/users/users.service.ts
 export async function searchUsers(q: string, signal?: AbortSignal) {
   const { data } = await api.get("/users/search", { params: { q }, signal });
   return data;
@@ -32,7 +32,7 @@ export async function searchUsers(q: string, signal?: AbortSignal) {
 ```
 
 ```typescript
-// src/api/queries/use-user-search.ts
+// src/api/features/users/use-user-search.ts
 export function useUserSearch(q: string) {
   return useQuery({
     queryKey: ["users", "search", q] as const,
@@ -74,7 +74,7 @@ const { data, isFetching, isPending } = useUserSearch(debouncedQ);
 // Show isFetching on the input region; data reflects debouncedQ only
 ```
 
-Put debounce in `src/lib/hooks/use-debounce.ts`. Keep search hooks in `src/api/queries/`.
+Put debounce in `src/lib/hooks/use-debounce.ts`. Keep search hooks in `src/api/features/<domain>/`.
 
 ## Stale responses without abort
 
@@ -111,7 +111,7 @@ Prefer Query’s built-in behavior over hand-rolled `requestId` when data is ser
 
 ## Optimistic updates
 
-Define optimistic logic in **`src/api/queries/**`**, not pages:
+Define optimistic logic in **`src/api/features/**`** query modules, not pages:
 
 ```typescript
 onMutate: async (vars) => {

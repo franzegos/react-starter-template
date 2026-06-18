@@ -25,3 +25,7 @@ For **commits**, **pull requests**, and **merge readiness**, always **read and f
 
 6. **Local verify only** — run `pnpm verify` before commit (`commit-changes`), PR (`create-pull-request`), and merge review (`merge-readiness-check`); do not check PR CI status (`gh pr checks`, GitHub Actions, Vercel).
 7. **Stay on the feature branch** after creating a branch, pushing, or opening a PR — do not check out `main` unless the user asks.
+
+## Cursor rules & incidents
+
+Other rules load by glob when you edit matching paths. New rules: log mistakes in [`docs/incident-log.md`](../../docs/incident-log.md) — promote after **3×** repeats.

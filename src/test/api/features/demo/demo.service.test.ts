@@ -5,7 +5,7 @@ vi.mock("@/api/client", () => ({
 }));
 
 import api from "@/api/client";
-import { fetchDemoPost } from "@/api/services/demo";
+import { fetchDemoPost } from "@/api/features/demo/demo.service";
 
 const mockedApi = api as unknown as { get: ReturnType<typeof vi.fn> };
 
@@ -26,12 +26,27 @@ describe("fetchDemoPost", () => {
 
     const result = await fetchDemoPost();
 
-    expect(mockedApi.get).toHaveBeenCalledWith("/posts/1");
+    expect(mockedApi.get).toHaveBeenCalledWith("/posts/1", {
+      signal: undefined,
+    });
     expect(result).toEqual({
       userId: 1,
       id: 1,
       title: "Hello",
       body: "World",
+    });
+  });
+
+  it("forwards AbortSignal to the client", async () => {
+    const controller = new AbortController();
+    mockedApi.get.mockResolvedValueOnce({
+      data: { userId: 1, id: 1, title: "T", body: "B" },
+    });
+
+    await fetchDemoPost(controller.signal);
+
+    expect(mockedApi.get).toHaveBeenCalledWith("/posts/1", {
+      signal: controller.signal,
     });
   });
 

@@ -34,4 +34,4 @@ Use shadcn/ui as the default UI layer for this template. The selected preset/the
 
 Custom UI is still fine for app-specific composition and layouts. The rule is: shadcn for reusable UI primitives, custom code for product-specific assembly.
 
-For **interaction** completeness (states, feedback, keyboard, loading/empty/error, motion intent), follow `interaction-polish.mdc` — not a second visual theme.
+For **interaction** completeness (states, feedback, keyboard, motion intent), follow `interaction-polish.mdc` and `error-handling.mdc` — not a second visual theme.

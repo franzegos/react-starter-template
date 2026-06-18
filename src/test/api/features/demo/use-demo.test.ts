@@ -2,12 +2,12 @@ import { describe, expect, it, vi } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
 import { makeQueryWrapper } from "@/test/helpers/queryWrapper";
 
-vi.mock("@/api/services/demo", () => ({
+vi.mock("@/api/features/demo/demo.service", () => ({
   fetchDemoPost: vi.fn(),
 }));
 
-import { fetchDemoPost } from "@/api/services/demo";
-import { useDemoPost } from "@/api/queries/use-demo";
+import { fetchDemoPost } from "@/api/features/demo/demo.service";
+import { useDemoPost } from "@/api/features/demo/use-demo";
 
 const mockedFetch = vi.mocked(fetchDemoPost);
 

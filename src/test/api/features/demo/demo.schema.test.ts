@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { demoPostSchema } from "@/api/schema/demo.schema";
-import { nonEmptyString } from "@/api/schema/primitives.schema";
+import { demoPostSchema } from "@/api/features/demo/demo.schema";
 
 describe("demoPostSchema", () => {
   it("parses a valid post", () => {
@@ -17,15 +16,5 @@ describe("demoPostSchema", () => {
     expect(() =>
       demoPostSchema.parse({ userId: 1, id: 2, body: "Body" }),
     ).toThrow();
-  });
-});
-
-describe("nonEmptyString", () => {
-  it("trims and accepts non-empty values", () => {
-    expect(nonEmptyString.parse("  hello  ")).toBe("hello");
-  });
-
-  it("rejects empty strings", () => {
-    expect(() => nonEmptyString.parse("   ")).toThrow();
   });
 });

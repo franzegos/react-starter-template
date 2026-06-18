@@ -23,38 +23,40 @@ Follow these conventions for all new and renamed files and constants.
 - **Examples:** `use-debounce.ts`, `use-auth.ts`
 - **Location:** `src/lib/hooks/`
 
-### API query hooks (`src/api/queries/`)
+### API feature modules (`src/api/features/<domain>/`)
 
-| Scope                                      | Folder               | File name          | Exported hook (examples)                      |
-| ------------------------------------------ | -------------------- | ------------------ | --------------------------------------------- |
-| **Cross-cutting** (auth, utils)            | `queries/` root      | `use-<feature>.ts` | `useAuthSync`, `useAuthMe`                    |
-| **Surface-specific** (if you use segments) | `queries/<segment>/` | `use-<feature>.ts` | `useAdminDashboard` (from `use-dashboard.ts`) |
+Each backend domain gets one folder with **prefixed filenames**:
+
+| File | Purpose | Example |
+| ---- | ------- | ------- |
+| `<domain>.service.ts` | HTTP functions (no React) | `campaigns.service.ts` → `getCampaigns` |
+| `<domain>.schema.ts` | Zod + `z.infer` types | `campaigns.schema.ts` |
+| `<domain>.types.ts` | Optional DTO re-exports | `campaigns.types.ts` |
+| `use-<domain>.ts` | TanStack Query hooks | `use-campaigns.ts` → `useCampaigns` |
+
+| Scope | Folder | Example |
+| ----- | ------ | ------- |
+| **Domain module** | `features/<domain>/` | `features/campaigns/` |
+| **Surface + domain** | `features/<segment>/<domain>/` | `features/admin/reports/` |
+| **Cross-cutting** | `features/auth/` (same file set) | `auth.service.ts`, `use-auth.ts` |
 
 Rules:
 
-- **File name:** always `use-<kebab-case-feature>.ts` (e.g. `use-dashboard.ts`, `use-auth.ts`). Do **not** repeat the segment name in the file name when the file already lives under that segment folder.
-- **Exported hook:** camelCase, `use` prefix. Include **surface or domain** in the hook name when ambiguity would hurt (`useAdminOrders` vs `useStorefrontOrders`).
-- Do **not** suffix with the underlying TanStack API (`Mutation`, `Query`) — name by intent (`useAuthSync`, not `useAuthSyncMutation`).
+- **Folder name:** lowercase / kebab-case — `campaigns`, `payment-methods`.
+- **Query hook file:** `use-<kebab-domain>.ts`; **exported hook:** camelCase with `use` prefix (`useCampaigns`, `useAuthMe`).
+- Include **surface or domain** in the exported hook name when ambiguity would hurt (`useAdminOrders` vs `useStorefrontOrders`).
+- Do **not** suffix with `Mutation` or `Query` — name by intent.
+- **Do not** repeat the segment in the filename when the file already lives under `features/<segment>/` (same rule as before for nested segments).
 
-## API services (`src/api/services/`)
+Shared-only paths (not feature-owned):
 
-| Scope              | Example path                            | File name                       |
-| ------------------ | --------------------------------------- | ------------------------------- |
-| Cross-cutting      | `services/auth.ts`, `services/users.ts` | `<domain>.ts` or existing name  |
-| Segment (optional) | `services/admin/reports.ts`             | kebab-case or short domain name |
+- `src/api/schema/primitives.schema.ts` — shared Zod primitives
+- `src/api/types/global.types.ts` — `ApiSuccess`, pagination, cross-feature wrappers
+- `src/api/lib/` — optional `use-authenticated-query.ts` and similar helpers
 
-- **Functions:** `camelCase` — `getDashboard`, `postAuthSync`.
-- Do **not** prefix the filename with the segment when it already sits under `services/<segment>/`.
+## API services / schemas / types (legacy layout)
 
-## API types (`src/api/types/`)
-
-| Scope              | Example path                                   |
-| ------------------ | ---------------------------------------------- |
-| Cross-cutting      | `types/global.types.ts`, `types/auth.types.ts` |
-| Segment (optional) | `types/admin/reports.types.ts`                 |
-
-- **File name:** `<feature>.types.ts` (kebab-case or camelCase **feature** segment; stay consistent within the folder).
-- **Type names:** PascalCase — `DashboardData`, `AuthMeData`.
+**Do not** add new domain files under flat `src/api/services/`, `src/api/queries/`, or `src/api/schema/<domain>.schema.ts`. Use **`src/api/features/<domain>/`** instead.
 
 ## Type-only modules (non-API)
 
@@ -93,7 +95,7 @@ Rules:
 
 - Use **lowercase** for single words: `admin`, `app`, `utils`, `hooks`
 - Use **kebab-case** for multi-word folders when helpful (`payment-methods`, `mock-data`)
-- Under `src/api/`, **segment folder names** should match your API and stay **consistent** (singular vs plural — pick one convention per project).
+- Under `src/api/`, **feature folder names** match backend modules (`features/campaigns/`, `features/billing/`). Optional surface segments: `features/admin/…`.
 - **Static asset file names** under `src/assets/` — kebab-case (e.g. `logo-dark.svg`). Icon and SVG *usage* — see `icons-and-assets.mdc`.
 
 ## Quick Reference
@@ -103,10 +105,10 @@ Rules:
 | Page folders (`src/pages/`)                                | lowercase / kebab-case                            | `home`, `creator/account`  |
 | Page component files                                       | PascalCase                                        | `HomePage.tsx`             |
 | Layout / component (`.tsx`, except `components/ui`)        | PascalCase                                        | `AppSidebar.tsx`           |
-| API query file (cross-cutting)                             | `use-<kebab>.ts` at `api/queries/`                | `use-auth.ts`              |
-| API query file (segment)                                   | `use-<kebab>.ts` under `api/queries/<segment>/`   | `admin/use-dashboard.ts`   |
-| API service (segment)                                      | `<domain>.ts` under `api/services/<segment>/`     | `admin/reports.ts`         |
-| API types (segment)                                        | `<feature>.types.ts` under `api/types/<segment>/` | `admin/reports.types.ts`   |
+| API feature folder                                         | `features/<domain>/`                              | `features/campaigns/`      |
+| API service / schema / types (in feature)                  | `<domain>.service.ts`, `.schema.ts`, `.types.ts`  | `campaigns.service.ts`     |
+| API query hook (in feature)                                | `use-<domain>.ts` under `features/<domain>/`      | `use-campaigns.ts`         |
+| Shared API schema / types                                  | `api/schema/`, `api/types/` at root               | `primitives.schema.ts`     |
 | Hook files (app, `lib/hooks`)                              | `use-<kebab>.ts`                                  | `use-auth.ts`              |
 | Type modules                                               | `<name>.types.ts`                                 | `auth.types.ts`            |
 | Utility / logic (`.ts`)                                    | camelCase                                         | `mockData.ts`              |

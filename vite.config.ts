@@ -18,12 +18,7 @@ export default defineConfig({
     include: ["src/test/**/*.{test,spec}.{ts,tsx}"],
     coverage: {
       provider: "v8",
-      include: [
-        "src/lib/**",
-        "src/api/schema/**",
-        "src/api/services/**",
-        "src/api/queries/**",
-      ],
+      include: ["src/lib/**", "src/api/schema/**", "src/api/features/**"],
       exclude: [
         "src/test/**",
         "src/**/*.{test,spec}.{ts,tsx}",

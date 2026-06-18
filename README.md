@@ -1,60 +1,108 @@
-# personal-ai-frontend-template
+# Personal AI Frontend Template
 
-**My personal webapp frontend template** — Cursor rules, skills, and a React app shell agents already understand.
+## Description
 
-Vite 7 · React 19 · TypeScript · shadcn/ui · TanStack Query · Zustand · Axios · Zod · Vitest
+My personal production-ready Vite + React starter. Cursor rules, skills, and an app shell agents already understand — feature-first API modules, TanStack Query, shadcn/ui, and guardrails for security, async UX, and forms.
 
----
+## Key Features
 
-## Quick start
+- **Vite 7 + React 19 + TypeScript** — fast dev, strict typecheck in CI
+- **Feature-first API layer** — `src/api/features/<domain>/` (service, schema, types, hooks)
+- **TanStack Query** — server state, cache, mutations; Zustand for client-only state
+- **Zod** — shared primitives + per-feature schemas; env parsing in `config.ts`
+- **shadcn/ui** — Radix primitives, semantic tokens, interaction-polish rules
+- **React Router** — layout shell, `ProtectedRoute` ready for your auth layer
+- **Vitest** — API, lib, and page tests with `renderWithProviders`
+- **Cursor rules & skills** — commit, PR, merge-readiness, shadcn MCP
+- **Golden-path demo** — `DemoPostSection` models `feature-state`, `error-handling`, `response-mapping`, `async-ui`; `OfflineBanner` for `offline-reconnect`
+- **`pnpm verify`** — format, lint, typecheck, test, build (same gates as CI)
+
+## Pre-requisites
+
+| Tool    | Version / notes                             |
+| ------- | ------------------------------------------- |
+| Node.js | 20+                                         |
+| pnpm    | 10 (see `packageManager` in `package.json`) |
+
+## Local Environment Setup
+
+### 1. Install dependencies
 
 ```bash
 pnpm install
+```
+
+### 2. Configure environment
+
+```bash
 cp .env.example .env
+```
+
+Set `VITE_API_URL` to your backend (or a mock API for the demo).
+
+### 3. Run the dev server
+
+```bash
 pnpm dev
 ```
 
-| Command             |                                    |
-| ------------------- | ---------------------------------- |
-| `pnpm verify`       | same gates as CI (run before push) |
-| `pnpm build`        | typecheck + production build       |
-| `pnpm test:run`     | Vitest once                        |
-| `pnpm lint`         | ESLint                             |
-| `pnpm format`       | Prettier write                     |
-| `pnpm format:check` | Prettier check                     |
+| URL                   | What               |
+| --------------------- | ------------------ |
+| http://localhost:5173 | App (Vite default) |
 
----
+### 4. Verify before push
 
-## First steps
+```bash
+pnpm verify
+```
 
-1. Rename the package, app title, and README heading.
-2. Set `VITE_API_URL` in `.env`.
-3. Apply your [shadcn theme](#theming).
-4. Remove the demo page when real features replace it.
-5. Tune which Cursor rules are always-on (see below).
+Same pipeline as CI: Prettier, ESLint, `tsc`, Vitest, production build.
 
----
+### 5. Add a feature
 
-## What's included
+Create a module under `src/api/features/<domain>/`:
 
-**Cursor**
+```
+src/api/features/campaigns/
+├── campaigns.service.ts
+├── campaigns.schema.ts
+├── campaigns.types.ts
+└── use-campaigns.ts
+```
 
-- `.cursor/rules/` — API, naming, state, Zod, Vitest, shadcn UI, interaction polish, icons
-- `.cursor/skills/` — commit, PR, merge-readiness, shadcn
-- `.cursor/mcp.json` — shadcn registry MCP (enable in Cursor settings)
+Add pages under `src/pages/<domain>/`, mappers under `src/lib/<domain>/`. Follow [api-layer](.cursor/rules/api-layer.mdc) and [frontend-feature-boundaries](.cursor/rules/frontend-feature-boundaries.mdc).
 
-**App**
+Mirror tests under `src/test/api/features/<domain>/` — see [vitest-testing](.cursor/rules/vitest-testing.mdc).
 
-- Demo home page — Zustand, TanStack Query, Sonner, error boundary, dark mode
-- API scaffold — Axios client, Zod primitives, example service/query/tests
-- Routing shell — React Router, minimal `ProtectedRoute`
-- Default shadcn theme — [apply your own](#theming)
+### Useful scripts
 
----
+| Script          | Purpose                              |
+| --------------- | ------------------------------------ |
+| `pnpm verify`   | Format, lint, typecheck, test, build |
+| `pnpm dev`      | Vite dev server                      |
+| `pnpm build`    | Typecheck + production build         |
+| `pnpm test:run` | Vitest once                          |
+| `pnpm lint`     | ESLint                               |
+| `pnpm format`   | Prettier write                       |
 
-## Cursor
+## Documentation
 
-### Skills
+| Doc                                                                 | Contents                                                                                          |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| [API layer](.cursor/rules/api-layer.mdc)                            | Feature modules, services, Query hooks, OpenAPI-ready layout                                      |
+| [Feature boundaries](.cursor/rules/frontend-feature-boundaries.mdc) | Pages, API, lib ownership; no cross-feature imports                                               |
+| [Error handling](.cursor/rules/error-handling.mdc)                  | Loading, empty, error, success — no silent blank UI                                               |
+| [Forms & drafts](.cursor/rules/forms-and-drafts.mdc)                | Unsaved changes, blockers, autosave, draft recovery                                               |
+| [Offline & reconnect](.cursor/rules/offline-reconnect.mdc)          | Sleep, tab resume, reconnect — cached data + retry                                                |
+| [Feature state](.cursor/rules/feature-state.mdc)                    | One derived `status` per surface — no boolean spaghetti                                           |
+| [Frontend security](.cursor/rules/frontend-security.mdc)            | Permissions are UX only; backend is source of truth                                               |
+| [Data ownership](.cursor/rules/data-ownership.mdc)                  | Query vs RHF vs useState vs Zustand                                                               |
+| [Interaction polish](.cursor/rules/interaction-polish.mdc)          | Motion, feedback, keyboard, perceived performance                                                 |
+| [Incident log](docs/incident-log.md)                                | Track AI mistakes; promote to rules after 3×                                                      |
+| [Theming](#theming)                                                 | shadcn Create presets                                                                             |
+| [Cursor rules](.cursor/rules/)                                      | Full ruleset — `repo-agent-skills` explains skills; start with `naming-conventions` + `api-layer` |
+
+### Cursor skills
 
 | Skill                    | Example           |
 | ------------------------ | ----------------- |
@@ -64,26 +112,21 @@ pnpm dev
 
 PR body uses `.github/PULL_REQUEST_TEMPLATE.md` (not Cursor's global PR format).
 
-### Rules
+### Cursor rules (file-scoped)
 
-| Scope            | Rules                                                                                                                                                                                                                                                                                         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Always apply** | `naming-conventions`, `repo-agent-skills`                                                                                                                                                                                                                                                     |
-| **File-scoped**  | `accessibility`, `api-layer`, `async-ui`, `data-ownership`, `frontend-feature-boundaries`, `frontend-security`, `icons-and-assets`, `interaction-polish`, `performance`, `react-state-zustand`, `response-mapping`, `route-protection`, `shadcn-ui-usage`, `vitest-testing`, `zod-validation` |
+`accessibility`, `api-layer`, `async-ui`, `data-ownership`, `error-handling`, `feature-state`, `forms-and-drafts`, `frontend-feature-boundaries`, `frontend-security`, `icons-and-assets`, `interaction-polish`, `offline-reconnect`, `performance`, `react-state-zustand`, `response-mapping`, `route-protection`, `shadcn-ui-usage`, `vitest-testing`, `zod-validation`
 
-Details: `.cursor/rules/`. Always-on rules use more tokens per request — tune in Cursor rule settings.
+**Always apply:** `naming-conventions`, `repo-agent-skills`
+
+Tune always-on rules in Cursor settings — they use more tokens per request.
 
 ### shadcn/ui
-
-- Prefer installed shadcn components; install native ones as needed.
-- Community registries: agent suggests a fit first, you approve before install.
-- Pointer cursor for buttons is already in `src/index.css`.
 
 ```bash
 pnpm dlx shadcn@latest add card dialog -y
 ```
 
----
+Prefer installed shadcn components; community registries need your approval before install. Enable the shadcn MCP in `.cursor/mcp.json`.
 
 ## Theming
 
@@ -95,8 +138,6 @@ pnpm dlx shadcn@latest apply <preset-code> --only theme -y
 
 `--only theme` updates mainly `src/index.css`. Re-add the pointer block in that file if a theme apply overwrites it. [Docs](https://ui.shadcn.com/docs/cli#apply).
 
----
-
 ## Stack
 
-React 19, Vite 7, TypeScript, Tailwind v4, shadcn/ui (Radix), React Router, TanStack Query, Zustand, Axios, Zod, Sonner. Node **20+**.
+React 19, Vite 7, TypeScript, Tailwind v4, shadcn/ui (Radix), React Router, TanStack Query, Zustand, Axios, Zod, Sonner, Vitest.

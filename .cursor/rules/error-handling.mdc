@@ -1,0 +1,156 @@
+---
+description: Async read UX — loading, empty, error, and success states; never silent blank UI
+globs: src/pages/**/*.{ts,tsx},src/components/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Error handling & async read UX
+
+See also: **`interaction-polish.mdc`** (skeletons, motion, recovery copy), **`async-ui.mdc`** (pending vs fetching), **`accessibility.mdc`** (announcements), **`api-layer.mdc`** (mutation toasts), **`feature-state.mdc`** (derive one status union per surface).
+
+Every **data-driven surface** (page, section, list, table, card region) must implement **four states**: **loading**, **empty**, **error**, and **success** (content ready). Derive a single **`status` union** per surface in hooks or `src/lib/<domain>/` — see **`feature-state.mdc`**. Motion and micro-feedback stay in `interaction-polish.mdc`.
+
+## Core rule
+
+**Never ship a silent blank UI.** Users must always see *something* intentional: skeleton, empty guidance, error recovery, or content.
+
+## Forbidden patterns
+
+```tsx
+// Bad — blank screen; user cannot tell loading vs broken vs empty
+if (!data) return null;
+
+// Bad — conflates loading and empty
+if (!data) return <p>No data</p>;
+
+// Bad — error swallowed
+const { data } = useItems();
+return <ItemList items={data ?? []} />;
+```
+
+```tsx
+// Good — explicit branches
+const { data, isPending, isError, error, refetch, isFetching } = useItems();
+
+if (isPending) return <ItemsSkeleton />;
+if (isError) return <ItemsError error={error} onRetry={() => void refetch()} />;
+if (!data?.length) return <ItemsEmpty onCreate={openCreate} />;
+
+return (
+  <>
+    {isFetching && <RefreshingIndicator />}
+    <ItemList items={data} />
+  </>
+);
+```
+
+Prefer a small colocated component (`ItemsSection.tsx`) when the branch logic grows — still **one explicit path per state**.
+
+## State matrix
+
+| State | When | UI |
+| ----- | ---- | -- |
+| **Loading** | Initial fetch (`isPending`) | Skeleton matching final layout — not a lone page spinner |
+| **Error** | `isError` | What happened + retry (and support path if needed) |
+| **Empty** | Success + zero items / null entity | What this is, why empty, primary next action |
+| **Success** | Data present | Content; optional subtle `isFetching` for background refetch |
+
+**Empty ≠ error ≠ loading.** Never use the same copy for all three.
+
+## TanStack Query conventions
+
+```tsx
+const query = useCampaigns();
+
+// Initial load
+if (query.isPending) return <CampaignsSkeleton />;
+
+// Hard failure (no cached data to show)
+if (query.isError) {
+  return (
+    <QueryErrorState
+      message="Couldn’t load campaigns."
+      onRetry={() => void query.refetch()}
+    />
+  );
+}
+
+const campaigns = query.data ?? [];
+
+if (campaigns.length === 0) {
+  return <CampaignsEmpty onCreate={() => navigate("/campaigns/new")} />;
+}
+
+return <CampaignTable rows={campaigns} isRefreshing={query.isFetching} />;
+```
+
+- **`isPending`** — no data yet → skeleton.
+- **`isError`** — show recovery; use `failureCount` / `error` for copy when useful.
+- **`isFetching` + cached data** — keep content visible; inline refresh indicator (`async-ui.mdc`).
+- **Do not** clear the list to `[]` on every refetch unless product requires it.
+
+## Success feedback
+
+| Context | Pattern |
+| ------- | ------- |
+| List / detail load | Render content — success is the default branch |
+| Mutation save | Toast or inline “Saved” on the control (`interaction-polish.mdc` §4) |
+| Background sync | “Syncing…” / “All changes saved” in editor toolbar (`forms-and-drafts.mdc`) |
+
+## Errors: what to show
+
+Every error state answers (`interaction-polish.mdc` §16):
+
+1. **What happened?** — plain language, not status codes alone
+2. **Why?** — when it helps (offline, permissions, validation)
+3. **What now?** — retry, go back, edit input, contact support
+
+```tsx
+// Bad
+<p>Error</p>
+
+// Good
+<Alert variant="destructive">
+  <AlertTitle>Couldn’t load campaigns</AlertTitle>
+  <AlertDescription>Check your connection and try again.</AlertDescription>
+  <Button variant="outline" size="sm" onClick={onRetry}>Retry</Button>
+</Alert>
+```
+
+API mutation errors: toast + rollback in query hooks (`api-layer.mdc`) — not silent `console.error`.
+
+## Empty states
+
+Never bare “No data”. Include (`interaction-polish.mdc` §15):
+
+- What this section is for
+- Why it might be empty (first time, filters, permissions)
+- Primary action (create, clear filters, upgrade)
+
+## Partial / multi-region pages
+
+Do not gate the **entire page** on the slowest query (`interaction-polish.mdc` §11). Each region owns its own loading / empty / error / success.
+
+```tsx
+// Good — dashboard regions load independently
+<PageShell>
+  <CampaignsSummary />
+  <RecentActivity />   {/* own skeleton / error / empty */}
+  <BillingWidget />
+</PageShell>
+```
+
+## Accessibility
+
+- Loading regions: `aria-busy="true"` when appropriate (`accessibility.mdc`).
+- Errors: visible text + retry; `role="alert"` for critical inline errors.
+- Do not rely on color alone for error vs success.
+
+## Checklist
+
+- [ ] No `if (!data) return null` on user-facing data surfaces.
+- [ ] Loading uses skeleton or structured placeholder — not an empty div.
+- [ ] Empty state explains and offers a next step.
+- [ ] Error state offers retry or clear recovery.
+- [ ] Success branch renders real content; mutations acknowledge save/sync.
+- [ ] Multi-query pages handle each region’s states independently.

@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchDemoPost } from "@/api/services/demo";
+import { fetchDemoPost } from "@/api/features/demo/demo.service";
 
 export const demoPostQueryKey = ["demo", "post"] as const;
 
 export function useDemoPost() {
   return useQuery({
     queryKey: demoPostQueryKey,
-    queryFn: fetchDemoPost,
+    queryFn: ({ signal }) => fetchDemoPost(signal),
   });
 }

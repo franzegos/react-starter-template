@@ -1,6 +1,6 @@
 ---
 description: Route protection — auth resolution order, role gates, no protected fetch before auth
-globs: src/pages/**/*.{ts,tsx},src/components/guards/**/*.{ts,tsx},src/providers/**/*.{ts,tsx},src/api/queries/**/*
+globs: src/pages/**/*.{ts,tsx},src/components/guards/**/*.{ts,tsx},src/providers/**/*.{ts,tsx},src/api/features/**/*
 alwaysApply: false
 ---
 
@@ -92,7 +92,7 @@ export function useDashboard() {
 }
 ```
 
-Or use a shared **`useAuthenticatedQuery`** helper in `src/api/queries/` when the pattern repeats (`api-layer.mdc`).
+Or use a shared **`useAuthenticatedQuery`** helper in `src/api/lib/` when the pattern repeats (`api-layer.mdc`).
 
 **Do not** fire `/admin/*` queries on public routes “because Query will error” — waste and noisy errors.
 

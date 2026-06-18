@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Interaction Polish
 
-See also: **`accessibility.mdc`**, **`async-ui.mdc`**.
+See also: **`accessibility.mdc`**, **`async-ui.mdc`**, **`error-handling.mdc`**.
 
 Premium UIs feel alive because **every action is acknowledged as close to immediate as technically possible** (target: under 100ms) — focus move, loading state, optimistic update, state change, or visual response. This rule covers that layer.
 
@@ -17,7 +17,7 @@ Premium UIs feel alive because **every action is acknowledged as close to immedi
 | Layer | Source | Owns |
 | ----- | ------ | ---- |
 | **Visual** | shadcn preset + `index.css` tokens | Color, radius, rings/shadows, typography, installed primitive styles |
-| **Interaction** | This rule | States, feedback, motion intent, keyboard, focus, loading/empty/error flows |
+| **Interaction** | This rule | Motion, feedback timing, keyboard, focus — **state branches** live in `error-handling.mdc` |
 
 **Primitives** (`Button`, `Card`, `Input`, `Dialog`, …) — use installed shadcn components and their built-in hover, press, and focus behavior. Do not override press/hover with conflicting patterns.
 
@@ -81,7 +81,7 @@ Pair with TanStack Query (`isPending`, `isFetching`, `placeholderData`) so in-fl
 
 ## 3. State-driven design
 
-Define **all** states before shipping. Do not stop at the happy path.
+Define **all** states before shipping. Do not stop at the happy path. For **loading / empty / error / success** branches on data surfaces, follow **`error-handling.mdc`** — including the ban on `if (!data) return null`.
 
 **Button (composed or wrapped):** idle, hover, pressed, loading, disabled, success
 
@@ -294,7 +294,7 @@ For fetches and mutations:
 - Avoid data loss; queue or roll back optimistics clearly
 - Communicate sync status (syncing, saved, offline, failed)
 
-The user should feel safe even when the network is unreliable. Pair with TanStack Query `retry`, `networkMode`, and mutation error handlers.
+The user should feel safe even when the network is unreliable. Pair with TanStack Query `retry`, `networkMode`, and mutation error handlers. Full offline/reconnect patterns: **`offline-reconnect.mdc`**.
 
 ---
 

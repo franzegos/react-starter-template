@@ -1,20 +1,14 @@
 import { useSyncExternalStore } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useDemoPost } from "@/api/queries/use-demo";
+import { toast } from "sonner";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useCounterStore } from "@/lib/stores/counterStore";
 import { DemoErrorTrigger } from "./DemoErrorTrigger";
-import { toast } from "sonner";
+import { DemoPostSection } from "./DemoPostSection";
 
 const themeOptions = [
   { value: "light", label: "Light", icon: Sun },
@@ -38,9 +32,6 @@ export function HomePage() {
   const increment = useCounterStore((s) => s.increment);
   const decrement = useCounterStore((s) => s.decrement);
   const reset = useCounterStore((s) => s.reset);
-
-  const { data, isPending, isError, error, refetch, isFetching } =
-    useDemoPost();
 
   return (
     <div className="min-h-screen px-4 py-10 sm:py-14">
@@ -72,7 +63,7 @@ export function HomePage() {
                     theme === value && "bg-background shadow-sm",
                   )}
                   onClick={() => setTheme(value)}
-                  title={label}
+                  aria-label={label}
                   aria-pressed={theme === value}
                 >
                   <Icon className="size-4" aria-hidden />
@@ -130,47 +121,7 @@ export function HomePage() {
             </CardContent>
           </Card>
 
-          <Card size="sm">
-            <CardHeader>
-              <CardTitle>Sample request</CardTitle>
-              <CardAction>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground h-8"
-                  disabled={isFetching}
-                  onClick={() => refetch()}
-                >
-                  {isFetching ? "Refreshing…" : "Refresh"}
-                </Button>
-              </CardAction>
-            </CardHeader>
-
-            <CardContent>
-              {isPending && (
-                <p className="text-muted-foreground text-sm">Loading…</p>
-              )}
-              {isError && (
-                <div className="space-y-3">
-                  <p className="text-destructive text-sm">{error.message}</p>
-                  <Button type="button" size="sm" onClick={() => refetch()}>
-                    Retry
-                  </Button>
-                </div>
-              )}
-              {data && (
-                <div className="space-y-2">
-                  <p className="text-sm leading-snug font-medium">
-                    {data.title}
-                  </p>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {data.body}
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <DemoPostSection />
 
           <Card size="sm">
             <CardHeader>

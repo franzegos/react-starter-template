@@ -1,0 +1,164 @@
+---
+description: Feature-level UI status — one derived state per surface; no boolean spaghetti
+globs: src/pages/**/*.{ts,tsx},src/components/**/*.{ts,tsx},src/api/features/**/*
+alwaysApply: false
+---
+
+# Feature state
+
+See also: **`error-handling.mdc`**, **`data-ownership.mdc`**, **`async-ui.mdc`**, **`offline-reconnect.mdc`**, **`api-layer.mdc`**.
+
+Each **feature surface** (list page, detail panel, editor, submit flow) exposes **one derived status** — not a pile of `isLoading`, `isPending`, `isSubmitting`, `isSaving`, `isUpdating` booleans in JSX.
+
+No XState required. Use a **small union type** and derive it in **one place** (query hook, orchestration hook, or `src/lib/<domain>/` helper).
+
+## Core rule
+
+**Pages render `status` — they do not combine five TanStack flags inline.**
+
+| Layer | Owns |
+| ----- | ---- |
+| TanStack Query / mutations | Raw fetch/mutation flags |
+| Feature hook or `getXxxStatus()` | **Single `status` union** per surface |
+| Page / component | `switch (status)` or status-driven subcomponents |
+
+## Read surfaces (lists, details)
+
+```typescript
+// src/lib/campaigns/campaignListStatus.ts
+import type { UseQueryResult } from "@tanstack/react-query";
+import type { Campaign } from "@/api/features/campaigns/campaigns.schema";
+
+export type CampaignListStatus =
+  | "loading"
+  | "error"
+  | "empty"
+  | "ready";
+
+export function getCampaignListStatus(
+  query: UseQueryResult<Campaign[]>,
+): CampaignListStatus {
+  if (query.isPending) return "loading";
+  if (query.isError) return "error";
+  if (!query.data?.length) return "empty";
+  return "ready";
+}
+```
+
+```tsx
+// Page — one branch per status
+const query = useCampaigns();
+const status = getCampaignListStatus(query);
+
+switch (status) {
+  case "loading":
+    return <CampaignsSkeleton />;
+  case "error":
+    return <CampaignsError onRetry={() => void query.refetch()} />;
+  case "empty":
+    return <CampaignsEmpty />;
+  case "ready":
+    return (
+      <CampaignTable
+        rows={query.data}
+        isRefreshing={query.isFetching}
+      />
+    );
+}
+```
+
+**Naming:** prefer `ready` over `success` for populated reads; reserve `success` for completed **actions** (save, submit).
+
+Aligns with `error-handling.mdc` — this rule is **how** to structure the code, not **what** to show.
+
+## Write surfaces (forms, mutations)
+
+Separate **read status** from **submit status**:
+
+```typescript
+export type SubmitStatus = "idle" | "submitting" | "success" | "error";
+
+// Orchestration hook in src/api/features/campaigns/use-submit-campaign.ts
+export function useSubmitCampaign() {
+  const mutation = useMutation({ ... });
+
+  const submitStatus: SubmitStatus = mutation.isPending
+    ? "submitting"
+    : mutation.isSuccess
+      ? "success"
+      : mutation.isError
+        ? "error"
+        : "idle";
+
+  return { submit: mutation.mutate, submitStatus, ... };
+}
+```
+
+```tsx
+const { submit, submitStatus } = useSubmitCampaign();
+
+<Button disabled={submitStatus === "submitting"}>
+  {submitStatus === "submitting" ? "Saving…" : "Save"}
+</Button>
+```
+
+**Do not** add `isSaving`, `isUpdating`, and `isSubmitting` as three parallel booleans — one `submitStatus` union.
+
+Reset `success` → `idle` after toast or navigation (timer or `onSettled`) when the control must be clickable again.
+
+## Optional: `thinking` (streaming / AI)
+
+For streaming or long-running AI steps, extend the union in that feature only:
+
+```typescript
+export type AssistantStatus = "idle" | "thinking" | "streaming" | "error";
+```
+
+Do not add `thinking` to every CRUD screen — only where product has a visible in-progress cognition phase.
+
+## Where derivation lives
+
+| Approach | When |
+| -------- | ---- |
+| `getXxxStatus(query)` in `src/lib/<domain>/` | Reused across pages; easy to unit test |
+| `select` + mapped return in query hook | Single consumer; status travels with data |
+| Orchestration hook (`useSubmitX`) | Submit flows with multiple steps |
+
+**Do not** derive status in JSX with compound conditions:
+
+```tsx
+// Bad — spaghetti
+const loading = isLoading || isFetching;
+const busy = isSubmitting || isSaving || isDeleting;
+if (loading && !busy) ...
+```
+
+## Multiple regions on one page
+
+Each **region** gets its own status — not one global boolean for the whole page:
+
+```tsx
+<CampaignsSummary status={summaryStatus} />
+<ActivityFeed status={activityStatus} />
+```
+
+## Background refresh
+
+`isFetching` while `status === 'ready'` → pass `isRefreshing` as a **prop**, not a separate top-level status:
+
+```tsx
+case "ready":
+  return <CampaignTable rows={data} isRefreshing={query.isFetching} />;
+```
+
+## Testing
+
+Unit-test `getXxxStatus` with table-driven Query result shapes — no render (`vitest-testing.mdc`).
+
+## Checklist
+
+- [ ] Pages avoid inline combos of `isPending` / `isLoading` / `isFetching` for branching.
+- [ ] Each data surface exports or uses one read `status` union.
+- [ ] Submit flows use one `submitStatus` (or named action status) — not parallel `isSaving` flags.
+- [ ] `empty` / `error` / `loading` / `ready` are mutually exclusive for reads.
+- [ ] Background refetch is `isRefreshing` on the ready branch, not a conflicting status.

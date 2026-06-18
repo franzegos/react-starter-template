@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Data ownership
 
-See also: **`react-state-zustand.mdc`**, **`api-layer.mdc`**, **`async-ui.mdc`**, **`performance.mdc`**.
+See also: **`react-state-zustand.mdc`**, **`api-layer.mdc`**, **`async-ui.mdc`**, **`performance.mdc`**, **`forms-and-drafts.mdc`**.
 
 Most frontend AI bugs trace to **unclear ownership**: the same fact lives in Query, Zustand, and `useState`, then drifts out of sync.
 
@@ -14,8 +14,8 @@ Most frontend AI bugs trace to **unclear ownership**: the same fact lives in Que
 
 | Kind of data              | Owner                         | Location                                      |
 | ------------------------- | ----------------------------- | --------------------------------------------- |
-| **Server / API data**     | TanStack Query                | `src/api/queries/`, render `data` from hooks  |
-| **Form input state**      | React Hook Form               | Page/modal + `@/api/schema/` for validation   |
+| **Server / API data**     | TanStack Query                | `src/api/features/<domain>/use-*.ts`, render `data` from hooks |
+| **Form input state**      | React Hook Form               | Page/modal + `@/api/features/<domain>/*.schema` for validation |
 | **Ephemeral UI**          | `useState` / `useReducer`     | Component or parent that owns the interaction   |
 | **Cross-page client UI**  | Zustand                       | `src/lib/stores/` — small, domain-split stores  |
 | **URL-addressable state** | Router search params          | Filters, tabs, pagination when shareable        |
@@ -24,7 +24,7 @@ Most frontend AI bugs trace to **unclear ownership**: the same fact lives in Que
 
 ## React Hook Form
 
-Use **React Hook Form** for multi-field forms (install with shadcn `Form` when needed). Pair with Zod via `@hookform/resolvers/zod` and schemas from `@/api/schema/`.
+Use **React Hook Form** for multi-field forms (install with shadcn `Form` when needed). Pair with Zod via `@hookform/resolvers/zod` and schemas from `@/api/features/<domain>/<domain>.schema`.
 
 - **RHF owns** field values, touched/dirty, and submit lifecycle.
 - **Zod owns** shape validation at submit (and optional `mode: "onBlur"`).
@@ -81,8 +81,8 @@ Do not mirror full server lists into a store “for convenience.”
 
 | Layer              | Owns                                                    |
 | ------------------ | ------------------------------------------------------- |
-| `api/services/`    | HTTP, parsing response DTOs                             |
-| `api/queries/`     | Keys, fetch, cache, mutations, toasts, optimistic patch |
+| `*.service.ts`     | HTTP, parsing response DTOs                             |
+| `use-*.ts` in feature | Keys, fetch, cache, mutations, toasts, optimistic patch |
 | `pages/` / UI      | Render `data`, `isPending`, `error`; call `mutate`      |
 | `lib/<domain>/`    | Pure mappers, message helpers — **no** fetched caches |
 

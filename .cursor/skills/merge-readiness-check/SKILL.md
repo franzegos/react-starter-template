@@ -170,15 +170,19 @@ Cite **N/A** when the diff does not touch relevant flows.
 
 **Read every rule file** under `.cursor/rules/` before judging merge readiness. Do not rely on memory — open each `.mdc` and check the diff against it.
 
-| Rule file                 | What to verify on this diff                                                                                                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api-layer.mdc`           | Types in `src/api/types/`; Zod in `src/api/schema/`; HTTP in `src/api/services/`; hooks in `src/api/queries/`; pages/components do not call `useQueryClient` for domain cache |
-| `zod-validation.mdc`      | `safeParse`/`parse` at boundaries; primitives reuse; optional vs nullable correct for PATCH                                                                                   |
-| `vitest-testing.mdc`      | New/changed `src/lib/` or `src/api/` has matching `src/test/…` tests when logic is non-trivial; no `it.todo` in touched tests                                                 |
-| `naming-conventions.mdc`  | Lowercase `pages/` folders; PascalCase page files; `use-*.ts` hooks; kebab-case asset filenames                                                                               |
-| `shadcn-ui-usage.mdc`     | UI uses shadcn primitives/semantic tokens before custom controls; new custom UI is product-specific composition, not replacement primitives                                   |
-| `icons-and-assets.mdc`    | UI icons via `iconLibrary`; brands via thesvg — no hand-rolled inline SVGs                                                                                                    |
-| `react-state-zustand.mdc` | Server data in TanStack Query; minimal `useEffect` in pages; derived state at render; Zustand only when shared                                                                |
+| Rule file                 | What to verify on this diff                                                                                                                                                                  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api-layer.mdc`           | Feature modules in `src/api/features/<domain>/`; shared primitives in `src/api/schema/`; shared wrappers in `src/api/types/`; pages/components do not call `useQueryClient` for domain cache |
+| `zod-validation.mdc`      | `safeParse`/`parse` at boundaries; primitives reuse; optional vs nullable correct for PATCH                                                                                                  |
+| `vitest-testing.mdc`      | New/changed `src/lib/` or `src/api/` has matching `src/test/…` tests when logic is non-trivial; no `it.todo` in touched tests                                                                |
+| `naming-conventions.mdc`  | Lowercase `pages/` folders; PascalCase page files; `use-*.ts` hooks; kebab-case asset filenames                                                                                              |
+| `shadcn-ui-usage.mdc`     | UI uses shadcn primitives/semantic tokens before custom controls; new custom UI is product-specific composition, not replacement primitives                                                  |
+| `icons-and-assets.mdc`    | UI icons via `iconLibrary`; brands via thesvg — no hand-rolled inline SVGs                                                                                                                   |
+| `react-state-zustand.mdc` | Server data in TanStack Query; minimal `useEffect` in pages; derived state at render; Zustand only when shared                                                                               |
+| `error-handling.mdc`      | Data surfaces implement loading, empty, error, success — no `if (!data) return null`                                                                                                         |
+| `forms-and-drafts.mdc`    | Long forms: dirty state, navigation blockers, autosave status, draft recovery when applicable                                                                                                |
+| `offline-reconnect.mdc`   | Cached reads offline, reconnect refetch, no `location.reload` on `online`, global online banner                                                                                              |
+| `feature-state.mdc`       | One `status` union per surface — no `isLoading` + `isSubmitting` + `isSaving` spaghetti in pages                                                                                             |
 
 In the verdict: **Pass** or **Fail** — list each violation with **rule file + path**; treat as **blocking** unless the user explicitly defers.
 

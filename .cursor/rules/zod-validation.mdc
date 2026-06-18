@@ -1,6 +1,6 @@
 ---
 description: Zod schemas and runtime validation boundaries for forms, env, and API data
-globs: src/api/schema/**/*,src/api/config.ts,src/pages/**/*.{ts,tsx},src/components/**/*.{ts,tsx},src/lib/**/*.{ts,tsx}
+globs: src/api/schema/**/*,src/api/features/**/*.schema.ts,src/api/config.ts,src/pages/**/*.{ts,tsx},src/components/**/*.{ts,tsx},src/lib/**/*.{ts,tsx}
 alwaysApply: false
 ---
 
@@ -14,7 +14,7 @@ See also: **`api-layer.mdc`** (where schemas live vs types/services/queries), **
 
 | Boundary                    | Where to parse                                       |
 | --------------------------- | ---------------------------------------------------- |
-| Form submit / modal confirm | `@/api/schema/...` before `mutate`                   |
+| Form submit / modal confirm | `@/api/features/<domain>/*.schema` before `mutate`   |
 | Client-side preflight       | Same schema as API body when possible                |
 | `import.meta.env`           | Parse once in `src/api/config.ts` when you add more keys (see `zod-validation.mdc`) |
 | Untrusted API payloads      | Optional `parse()` when runtime safety matters       |
@@ -83,7 +83,7 @@ const body = input as CreateResourceFormInput
 
 ```typescript
 // ✅ Page imports schema
-import { myFormSchema, type MyFormValues } from '@/api/schema/foo.schema'
+import { myFormSchema, type MyFormValues } from '@/api/features/foo/foo.schema'
 
 const parsed = myFormSchema.safeParse(formState)
 if (!parsed.success) {
@@ -94,7 +94,7 @@ mutate(parsed.data)
 
 ## File layout
 
-- **`src/api/schema/<domain>.schema.ts`** — Zod only; export schema + `z.infer` types.
-- **`src/api/schema/primitives.schema.ts`** — shared building blocks.
-- **`src/api/types/`** — TypeScript types for responses; add Zod parse when you need runtime checks.
+- **`src/api/features/<domain>/<domain>.schema.ts`** — domain Zod; export schema + `z.infer` types.
+- **`src/api/schema/primitives.schema.ts`** — shared building blocks only.
+- **`src/api/types/global.types.ts`** — shared TypeScript wrappers; feature DTO types live in **`features/<domain>/`**.
 - **`src/lib/<domain>/`** — mappers, message helpers, submit orchestration — **not** Zod definitions.
