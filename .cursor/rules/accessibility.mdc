@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Accessibility
 
-See also: **`interaction-polish.mdc`** (keyboard parity, focus, feedback), **`shadcn-ui-usage.mdc`**.
+See also: **`interaction-polish.mdc`** (keyboard parity, focus, feedback), **`shadcn-ui-usage.mdc`**, **`design-tokens.mdc`** (contrast via semantic colors, not hard-coded values).
 
 Polish without accessibility is incomplete. AI-generated UIs often look fine but fail keyboard, screen reader, and focus management.
 
@@ -15,7 +15,7 @@ Polish without accessibility is incomplete. AI-generated UIs often look fine but
 - Use **semantic HTML** first (`button`, `nav`, `main`, `label`, `h1`–`h6`).
 - Prefer **shadcn/Radix primitives** — they ship focus traps and roles for Dialog, Sheet, Dropdown, etc. Do not rebuild modals with `div` + `onClick`.
 - Every interactive control must be **keyboard operable** (Tab, Enter/Space, Escape where expected).
-- **Visible focus** — never `outline: none` without an equivalent focus ring (`interaction-polish.mdc`).
+- **Visible focus** — never `outline: none` without an equivalent focus ring (`interaction-polish.mdc`). Use `ring-ring` / focus tokens — not hard-coded focus colors (`design-tokens.mdc`).
 
 ## Keyboard navigation
 

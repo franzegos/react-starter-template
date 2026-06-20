@@ -24,7 +24,8 @@ The JSON above contains the project config and installed components. Use `npx sh
 1. **Use existing components first.** Use `npx shadcn@latest search` to check registries before writing custom UI. Check community registries too.
 2. **Compose, don't reinvent.** Settings page = Tabs + Card + form controls. Dashboard = Sidebar + Card + Chart + Table.
 3. **Use built-in variants before custom styles.** `variant="outline"`, `size="sm"`, etc.
-4. **Use semantic colors.** `bg-primary`, `text-muted-foreground` — never raw values like `bg-blue-500`.
+4. **Use semantic colors.** `bg-primary`, `text-muted-foreground` — never raw values like `bg-blue-500` or `text-[#6b7280]`.
+5. **Use the token scale.** `text-sm`, `p-4`, `rounded-lg` — never arbitrary `text-[13px]`, `bg-[#…]`, `rounded-[10px]` ([design-tokens.mdc](../../rules/design-tokens.mdc)).
 
 ## Critical Rules
 
@@ -32,6 +33,7 @@ These rules are **always enforced**. Each links to a file with Incorrect/Correct
 
 ### Styling & Tailwind → [styling.md](./rules/styling.md)
 
+- **Design tokens only.** Semantic colors + Tailwind scale — no arbitrary `text-[…]`, `bg-[…]`, hex, or raw palette. See [design-tokens.mdc](../../rules/design-tokens.mdc).
 - **`className` for layout, not styling.** Never override component colors or typography.
 - **No `space-x-*` or `space-y-*`.** Use `flex` with `gap-*`. For vertical stacks, `flex flex-col gap-*`.
 - **Use `size-*` when width and height are equal.** `size-10` not `w-10 h-10`.

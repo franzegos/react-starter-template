@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Icons & assets
 
-How to use images, UI icons, and SVGs in this template. Not file-naming rules — see `naming-conventions.mdc` for kebab-case under `src/assets/`.
+How to use images, UI icons, and SVGs in this template. Not file-naming rules — see `naming-conventions.mdc` for kebab-case under `src/assets/`. Icon **colors** follow `design-tokens.mdc` (semantic tokens, not arbitrary fills).
 
 ## UI icons
 

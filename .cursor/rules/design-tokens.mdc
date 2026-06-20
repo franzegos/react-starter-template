@@ -1,0 +1,92 @@
+---
+description: Tailwind and shadcn design tokens only — no arbitrary values or hard-coded colors
+globs: src/**/*.{ts,tsx},src/index.css,components.json
+alwaysApply: false
+---
+
+# Design tokens
+
+See also: **`shadcn-ui-usage.mdc`**, **`interaction-polish.mdc`**, **`src/index.css`**, shadcn skill [`styling.md`](../skills/shadcn/rules/styling.md).
+
+**All visual styling must flow through the theme** — semantic Tailwind classes backed by CSS variables in `src/index.css`. This keeps light/dark mode correct and makes rebranding a token change, not a repo-wide find-and-replace.
+
+## Core rule
+
+**No arbitrary Tailwind values** (`text-[13px]`, `bg-[#1a1a1a]`, `p-[18px]`, `rounded-[10px]`) and **no hard-coded colors** (hex, `rgb()`, raw palette like `text-gray-600`, `bg-blue-500`, inline `style={{ color: … }}`).
+
+Use the **scale** and **semantic tokens** instead.
+
+| Concern | Use | Not |
+| ------- | --- | --- |
+| **Text size** | `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl` | `text-[13px]`, `text-[0.8125rem]` |
+| **Spacing** | `gap-2`, `p-4`, `mt-6`, `space` scale (`0`–`96`) | `p-[18px]`, `gap-[11px]` |
+| **Radius** | `rounded-sm`, `rounded-md`, `rounded-lg`, `rounded-xl` (from `--radius`) | `rounded-[10px]` |
+| **Colors** | `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `text-destructive`, `bg-card`, `bg-accent` | `#fff`, `bg-[#…]`, `text-gray-500`, `bg-zinc-900` |
+| **Shadow / ring** | `shadow-sm`, `ring`, `ring-ring` | `shadow-[0_2px_8px_…]` |
+| **Dark mode** | Semantic tokens (auto via `.dark` in `index.css`) | `bg-white dark:bg-gray-950`, manual `dark:text-gray-400` on colors |
+
+Pick the **nearest scale step** when a design spec falls between tokens — do not invent a one-off arbitrary class.
+
+## Semantic colors (required)
+
+Colors express **role**, not hue. Status and surfaces use tokens or component variants:
+
+```tsx
+// Bad — bypasses theme; breaks dark mode and rebrand
+<p className="text-[#6b7280]">Secondary</p>
+<div className="bg-white dark:bg-zinc-900 border-gray-200">...</div>
+
+// Good
+<p className="text-sm text-muted-foreground">Secondary</p>
+<div className="bg-card text-card-foreground border-border">...</div>
+```
+
+| Need | Token / pattern |
+| ---- | ---------------- |
+| Page surface | `bg-background text-foreground` |
+| Card / panel | `bg-card text-card-foreground` |
+| Muted copy | `text-muted-foreground` |
+| Primary action | `Button` default / `bg-primary text-primary-foreground` |
+| Danger | `text-destructive`, `variant="destructive"` |
+| Borders / inputs | `border-border`, `bg-input`, `ring-ring` |
+| Sidebar | `bg-sidebar text-sidebar-foreground` |
+
+New brand colors → add a **CSS variable** in `src/index.css` (`:root` / `.dark`) and expose via `@theme inline` — not scattered hex in components.
+
+## Typography & layout
+
+- **Body default** — `text-base` (or inherit from `body` in `index.css`); labels often `text-sm`, captions `text-xs`.
+- **`className` on shadcn primitives** — layout only (`max-w-md`, `flex-1`, `mt-4`). Do not override primitive colors or font sizes that the component already encodes (`shadcn-ui-usage.mdc`).
+- **Font** — `font-sans` / theme `--font-sans`; no ad-hoc `font-['Inter']` unless added to theme.
+
+## When arbitrary values are OK
+
+Rare exceptions — document in PR if non-obvious:
+
+- **Layout math** unrelated to the design system (e.g. `max-h-[calc(100vh-4rem)]` for a full-height shell)
+- **Third-party embeds** you do not control
+- **One-off animation** durations — prefer theme-aligned values from `interaction-polish.mdc`
+
+Never use exceptions for **colors** or **type scale** — add tokens instead.
+
+## Anti-patterns
+
+```tsx
+// Bad
+<span className="text-[13px] text-gray-500">Label</span>
+<div className="rounded-[10px] bg-[#f4f4f5] p-[14px]">...</div>
+<Card className="bg-blue-50 text-blue-900 shadow-[0_1px_3px_rgba(0,0,0,0.1)]">...</Card>
+
+// Good
+<span className="text-sm text-muted-foreground">Label</span>
+<div className="rounded-lg bg-muted p-4">...</div>
+<Card className="max-w-md">...</Card>
+```
+
+## Checklist
+
+- [ ] No `text-[…]`, `bg-[…]`, `p-[…]`, `rounded-[…]` for colors, type, spacing, or radius.
+- [ ] No raw Tailwind palette (`gray-*`, `blue-*`, `zinc-*`) for UI surfaces or text.
+- [ ] No manual `dark:` color pairs — semantic tokens only.
+- [ ] New brand/theme needs → `src/index.css` variables, not component hex.
+- [ ] shadcn **variants** and **semantic tokens** before custom `className` styling.

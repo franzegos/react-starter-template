@@ -98,6 +98,7 @@ Mirror tests under `src/test/api/features/<domain>/` — see [vitest-testing](.c
 | [Frontend security](.cursor/rules/frontend-security.mdc)            | Permissions are UX only; backend is source of truth                                               |
 | [Data ownership](.cursor/rules/data-ownership.mdc)                  | Query vs RHF vs useState vs Zustand                                                               |
 | [Interaction polish](.cursor/rules/interaction-polish.mdc)          | Motion, feedback, keyboard, perceived performance                                                 |
+| [Design tokens](.cursor/rules/design-tokens.mdc)                    | Semantic colors and Tailwind scale only — no arbitrary values; safe dark mode and rebranding      |
 | [Incident log](docs/incident-log.md)                                | Track AI mistakes; promote to rules after 3×                                                      |
 | [Theming](#theming)                                                 | shadcn Create presets                                                                             |
 | [Cursor rules](.cursor/rules/)                                      | Full ruleset — `repo-agent-skills` explains skills; start with `naming-conventions` + `api-layer` |
@@ -114,7 +115,7 @@ PR body uses `.github/PULL_REQUEST_TEMPLATE.md` (not Cursor's global PR format).
 
 ### Cursor rules (file-scoped)
 
-`accessibility`, `api-layer`, `async-ui`, `data-ownership`, `error-handling`, `feature-state`, `forms-and-drafts`, `frontend-feature-boundaries`, `frontend-security`, `icons-and-assets`, `interaction-polish`, `offline-reconnect`, `performance`, `react-state-zustand`, `response-mapping`, `route-protection`, `shadcn-ui-usage`, `vitest-testing`, `zod-validation`
+`accessibility`, `api-layer`, `async-ui`, `data-ownership`, `design-tokens`, `error-handling`, `feature-state`, `forms-and-drafts`, `frontend-feature-boundaries`, `frontend-security`, `icons-and-assets`, `interaction-polish`, `offline-reconnect`, `performance`, `react-state-zustand`, `response-mapping`, `route-protection`, `shadcn-ui-usage`, `vitest-testing`, `zod-validation`
 
 **Always apply:** `naming-conventions`, `repo-agent-skills`
 

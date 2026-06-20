@@ -10,13 +10,13 @@ See also: **`accessibility.mdc`**, **`async-ui.mdc`**, **`error-handling.mdc`**.
 
 Premium UIs feel alive because **every action is acknowledged as close to immediate as technically possible** (target: under 100ms) — focus move, loading state, optimistic update, state change, or visual response. This rule covers that layer.
 
-**Not visual theming.** Colors, radius, depth, shadows, and primitive styling come from the shadcn preset and semantic tokens — see `shadcn-ui-usage.mdc` and `src/index.css`. Do not duplicate a parallel visual system here.
+**Not visual theming.** Colors, radius, depth, shadows, and primitive styling come from the shadcn preset and semantic tokens — see **`design-tokens.mdc`**, `shadcn-ui-usage.mdc`, and `src/index.css`. Do not duplicate a parallel visual system here.
 
 ## Two layers
 
 | Layer | Source | Owns |
 | ----- | ------ | ---- |
-| **Visual** | shadcn preset + `index.css` tokens | Color, radius, rings/shadows, typography, installed primitive styles |
+| **Visual** | shadcn preset + `index.css` tokens (`design-tokens.mdc`) | Color, radius, rings/shadows, typography, installed primitive styles |
 | **Interaction** | This rule | Motion, feedback timing, keyboard, focus — **state branches** live in `error-handling.mdc` |
 
 **Primitives** (`Button`, `Card`, `Input`, `Dialog`, …) — use installed shadcn components and their built-in hover, press, and focus behavior. Do not override press/hover with conflicting patterns.

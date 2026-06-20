@@ -8,17 +8,19 @@ alwaysApply: false
 
 Use shadcn/ui as the default UI layer for this template. The selected preset/theme works best when UI is built from shadcn primitives and semantic tokens instead of hand-rolled markup.
 
+See **`design-tokens.mdc`** for strict rules on colors, typography, spacing, and radius (no arbitrary values — required for dark mode and rebranding).
+
 ## Default approach
 
 1. **Use installed shadcn components first** — `Button`, `Card`, `Dialog`, `Input`, `Select`, `Tabs`, `Table`, `DropdownMenu`, `Tooltip`, `Sheet`, `Alert`, `Badge`, `Form`, etc.
 2. **Install from shadcn before building custom primitives** when a standard UI pattern is missing.
 3. **Compose product components from shadcn primitives** — e.g. `CampaignCard`, `AccountHeader`, or `SubmissionRowActionsMenu` can be custom components, but their buttons, dialogs, menus, fields, cards, and tables should come from `@/components/ui/...`.
-4. **Use semantic theme tokens** (`bg-card`, `text-muted-foreground`, `border`, `ring`, `bg-primary`, `text-destructive`, etc.) so presets apply consistently.
+4. **Use semantic theme tokens** (`bg-card`, `text-muted-foreground`, `border`, `ring`, `bg-primary`, `text-destructive`, etc.) — see **`design-tokens.mdc`** for the full token table and banned patterns.
 
 ## Avoid
 
 - Recreating standard controls with raw `<button>`, `<input>`, modal markup, dropdowns, tabs, tables, toasts, or ad-hoc card styles when shadcn has the primitive.
-- Hard-coded colors, shadows, radii, or spacing that fight the selected shadcn preset.
+- Hard-coded or arbitrary styling — hex/`rgb`, raw palette colors (`text-gray-600`), arbitrary Tailwind (`text-[13px]`, `bg-[#…]`, `rounded-[10px]`) — **`design-tokens.mdc`**.
 - Installing a new component library for UI primitives unless the user explicitly chooses it.
 
 ## Discovery and registries

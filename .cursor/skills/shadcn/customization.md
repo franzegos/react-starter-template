@@ -2,6 +2,8 @@
 
 Components reference semantic CSS variable tokens. Change the variables to change every component.
 
+**In app code:** use tokens only — no arbitrary `text-[…]` / `bg-[…]` / hex in components ([design-tokens.mdc](../../rules/design-tokens.mdc)). Extend the theme here in `src/index.css`, not per-component overrides.
+
 ## Contents
 
 - How it works (CSS variables → Tailwind utilities → components)

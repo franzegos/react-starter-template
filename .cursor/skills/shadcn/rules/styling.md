@@ -5,6 +5,7 @@ See [customization.md](../customization.md) for theming, CSS variables, and addi
 ## Contents
 
 - Semantic colors
+- No arbitrary Tailwind values
 - Built-in variants first
 - className for layout only
 - No space-x-_ / space-y-_
@@ -13,6 +14,8 @@ See [customization.md](../customization.md) for theming, CSS variables, and addi
 - No manual dark: color overrides
 - Use cn() for conditional classes
 - No manual z-index on overlay components
+
+Project rule: [design-tokens.mdc](../../../rules/design-tokens.mdc) — full token table and checklist.
 
 ---
 
@@ -57,6 +60,38 @@ For positive, negative, or status indicators, use Badge variants, semantic token
 ```
 
 If you need a success/positive color that doesn't exist as a semantic token, use a Badge variant or ask the user about adding a custom CSS variable to the theme (see [customization.md](../customization.md)).
+
+---
+
+## No arbitrary Tailwind values
+
+Use the **design scale** and **semantic tokens** — not one-off bracket classes. Required for dark mode and rebranding ([design-tokens.mdc](../../../rules/design-tokens.mdc)).
+
+**Incorrect:**
+
+```tsx
+<p className="text-[13px] text-[#6b7280]">Label</p>
+<div className="rounded-[10px] bg-[#f4f4f5] p-[14px]">...</div>
+<span className="text-gray-500">Muted</span>
+```
+
+**Correct:**
+
+```tsx
+<p className="text-sm text-muted-foreground">Label</p>
+<div className="rounded-lg bg-muted p-4">...</div>
+<span className="text-muted-foreground">Muted</span>
+```
+
+| Instead of                            | Use                                                 |
+| ------------------------------------- | --------------------------------------------------- |
+| `text-[13px]`, `text-[0.8125rem]`     | `text-xs` or `text-sm` (nearest step)               |
+| `p-[18px]`, `gap-[11px]`              | `p-4`, `gap-3`, etc.                                |
+| `rounded-[10px]`                      | `rounded-md`, `rounded-lg`                          |
+| `bg-[#…]`, `text-gray-*`, `bg-zinc-*` | `bg-card`, `text-muted-foreground`, `border-border` |
+| `bg-white dark:bg-gray-950`           | `bg-background`                                     |
+
+**Never** use arbitrary values for **colors** or **font sizes**. Add a CSS variable in `src/index.css` when the theme needs a new role.
 
 ---
 
