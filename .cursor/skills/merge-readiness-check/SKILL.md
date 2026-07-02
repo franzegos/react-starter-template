@@ -1,25 +1,31 @@
 ---
 name: merge-readiness-check
 description: >-
-  Pre-merge ship review. Covers bugs, edge cases, critical paths, regressions,
-  incomplete work, Cursor rules compliance (.cursor/rules), and merge confidence.
-  Local pnpm test:run only — never check PR CI. Use when the user asks if work is
-  ready to merge, "ready to merge?", edge cases, critical paths, breaking changes,
-  "any bugs", "follows cursor rules", or @merge-readiness-check.
+  Pre-merge ship review with a decision-first executive summary, then technical
+  assessment and verification. Covers bugs, edge cases, regressions, incomplete work,
+  Cursor rules compliance (.cursor/rules), evidence-based confidence, and merge impact.
+  Local pnpm verify only — never check PR CI. Use when the user asks if work is ready
+  to merge, "ready to merge?", edge cases, critical paths, breaking changes, "any bugs",
+  "follows cursor rules", or @merge-readiness-check.
 disable-model-invocation: true
 ---
 
 # Merge readiness check
 
-Structured review **before merge**. Goal: surface gaps early so the user can fix them with confidence.
+Structured review **before merge**. Report structure:
+
+1. **Scope** — what changed at a glance
+2. **Verdict** — decision, reason, confidence, review summary card
+3. **Executive review** — should I merge? (outcomes, craftsmanship, checks, merge impact)
+4. **Technical assessment** — blocking/resolved, edge cases, paths, rules
+5. **Verification** — local checks run
+6. **Recommendation** — only when a specific action is needed (otherwise omit)
 
 Run from **this repository’s** root. Use the feature branch and stated base branch (default `main`) unless the user specifies otherwise.
 
 If the user asks about **multiple repos**, run this workflow **once per repo** from each root and apply **that repo’s** `.cursor/rules/`.
 
 ## Trigger phrases (same intent)
-
-The user may ask in natural language, for example:
 
 - Can you check if there are any edge cases we miss?
 - Will there be any issue / critical paths after I merge this?
@@ -28,48 +34,55 @@ The user may ask in natural language, for example:
 - Will this have a bad effect on our existing features?
 - Are there any potential bugs in this change?
 
-Treat all of these as this skill. **This review explicitly includes hunting for likely bugs**, not only product gaps and edge cases.
+Treat all of these as this skill. **Hunt for likely bugs**, not only product gaps and edge cases.
 
-When the user asks **"ready to merge?"**, always answer all **required review dimensions** below — even if none apply, say so explicitly (e.g. "No payment flows touched").
+When the user asks **"ready to merge?"**, produce the **full output template** below.
+
+## Writing tone (required)
+
+Write like a **senior engineer reviewing a teammate's PR**. Be encouraging but evidence-based. Start with strengths, then discuss remaining concerns. Avoid generic praise or unnecessary criticism. **Every conclusion must be supported by something observed in the diff, tests, or verification.**
+
+**Do not invent praise** simply because a section exists. Omit bullets that cannot be directly supported by the diff or verification.
 
 ## Issue status labels (required)
 
-Every finding must use **one** status. **Never mix resolved and open items in the same list without labels.**
+Every finding must use **one** status. Map it to the correct section:
 
-| Label         | Meaning                                                                         | Where it goes       |
-| ------------- | ------------------------------------------------------------------------------- | ------------------- |
-| **Resolved**  | Fixed in the current diff or a named commit since the last review               | `### Resolved` only |
-| **Blocking**  | Must fix or verify before merge; confirmed defect or unverified acceptance path | `### Blocking` only |
-| **Verify**    | Likely OK in code but needs a manual/staging check (not a code change)          | `### Remaining`     |
-| **Follow-up** | Acceptable to merge; track after merge                                          | `### Remaining`     |
+| Label         | Meaning                                                              | Where it goes                                                                       |
+| ------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **Outcome**   | Objective, verifiable result (verify pass, tests added, no violations) | `### ✅ What's great` only — never in Things I loved                                |
+| **Craft**     | Specific engineering craftsmanship (abstraction, naming, API design)   | `### ❤️ Things I loved` only — optional; never duplicate What's great bullets       |
+| **Resolved**  | Fixed since the prior review (re-review only)                        | `### Resolved` under Technical assessment — **omit on first review**                |
+| **Blocking**  | Must fix before merge; confirmed defect or failed local verification | `### Blocking` under Technical assessment                                           |
+| **Verify**    | Likely OK in code but needs manual/staging check                     | `Before merging` under **Only a few things I'd still check** — **canonical source** |
+| **Follow-up** | Acceptable to merge; track after merge                               | `After merging` under **Only a few things I'd still check** — **canonical source**  |
 
-**On re-review** (user fixed issues or asked again after new commits):
+**What's great vs Things I loved — do not overlap:**
+
+| Section              | Content type          | Examples                                                                                    | Never include                                                                |
+| -------------------- | --------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **✅ What's great**  | Objective outcomes    | `pnpm verify` passed; no Cursor violations; contracts unchanged; tests added; isolated change | Craft praise ("elegant abstraction"), implementation details already in loved |
+| **❤️ Things I loved** | Engineering craft only | Elegant abstraction; clean separation; excellent naming; smart optimization; good API design | Outcomes already stated in What's great (tests added, verify passed)         |
+
+**Never repeat the same point across both sections.**
+
+**On re-review:**
 
 1. Read the **prior** merge-readiness comment or conversation findings.
 2. For each prior **Blocking** item: confirm fix in diff → move to **Resolved** (cite commit or file). If not fixed → keep under **Blocking**.
-3. Do **not** repeat resolved items under Blocking or dimensional sections unless the fix regressed.
-
-## Required review dimensions ("ready to merge?")
-
-Every verdict **must** include dedicated subsections for:
-
-1. **Edge cases & gaps** — empty states, error toasts, stale cache, race on double-submit, mobile/responsive
-2. **Critical paths** — auth, payments/checkout (if applicable), core user flows for this product
-3. **Breaking changes** — API assumptions, deploy order (backend first?), feature flags, shared type/schema drift
-4. **Cursor rules compliance** — violations in touched code
-
-Do not collapse these into a generic summary — the user expects this checklist every time.
+3. Add `### Resolved` only when there are resolved items. Do **not** include "None — first review" filler.
+4. Do **not** repeat resolved items under Blocking or technical subsections unless the fix regressed.
 
 ## What this review covers
 
-| Category            | Examples                                                                                                          |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **Potential bugs**  | Wrong conditions, stale state, missing `await`, null/undefined slips, off-by-one, inverted logic, wrong hook deps |
-| **Edge cases**      | Empty data, errors, races, validation boundaries                                                                  |
-| **Regressions**     | Existing features or routes that may break                                                                        |
-| **Incomplete work** | TODOs, skipped tests, debug leftovers                                                                             |
-| **Critical paths**  | Auth, payments, shared `src/api/client.ts`, high-traffic routes                                                   |
-| **Cursor rules**    | Violations of `.cursor/rules/*.mdc` in touched code                                                               |
+| Category            | Examples                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------- |
+| **Potential bugs**  | Wrong conditions, missing `await`, null slips, inverted logic, unhandled domain errors, wrong status codes |
+| **Edge cases**      | Empty data, pagination boundaries, validation failures, Redis unset vs set                                 |
+| **Regressions**     | Existing modules or routes that may break                                                                  |
+| **Incomplete work** | TODOs, skipped tests, debug leftovers                                                                      |
+| **Critical paths**  | Auth, payments, shared `src/api/client.ts`, high-traffic routes, TanStack Query cache |
+| **Cursor rules**    | Violations of `.cursor/rules/*.mdc` in touched code                                   |
 
 ## Workflow
 
@@ -83,7 +96,8 @@ Do not collapse these into a generic summary — the user expects this checklist
 - [ ] 7. Critical paths (product-specific high-risk areas)
 - [ ] 8. Cursor rules compliance (`.cursor/rules/`)
 - [ ] 9. Tests and verification (local only)
-- [ ] 10. Verdict + prioritized action list
+- [ ] 10. Fill Scope + review summary card from steps 1–9
+- [ ] 11. Write output (executive → technical → verification; recommendation only if needed)
 ```
 
 ### 1. Scope the change
@@ -95,7 +109,7 @@ git diff origin/<base>...HEAD
 git log origin/<base>..HEAD --oneline
 ```
 
-List modules/routes/hooks touched. If no git diff (uncommitted only), use `git diff` and staged diff.
+List modules/routes/hooks touched. Note what was **not** touched (auth, API client, other features, etc.). Use counts for **Scope** and **Review summary**.
 
 ### 2. Incomplete work scan
 
@@ -107,7 +121,7 @@ Search the changed tree (and related call sites):
 - Commented-out code blocks that look unfinished
 - Feature flags or hardcoded stubs
 
-Report each hit with file path. **Any unresolved item in touched production code → not ready** unless the user explicitly accepts deferring it.
+Report each hit with file path. **Any unresolved item in touched production code → Blocking** unless the user explicitly accepts deferring it.
 
 ### 3. Plan vs implementation
 
@@ -117,7 +131,7 @@ If the conversation included a plan, checklist, or acceptance criteria:
 | ------------ | ------------------------ | ----- |
 | …            | done / partial / missing | …     |
 
-Call out **missing** or **partial** items explicitly.
+Call out **missing** or **partial** items. Partial/missing acceptance criteria → **Blocking** or **Verify**.
 
 ### 4. Potential bugs (logic and correctness)
 
@@ -133,7 +147,7 @@ Read the diff like a **code review focused on defects**. For each changed functi
 - **Off-by-one / boundaries** — pagination, date ranges, inclusive vs exclusive limits
 - **UI logic bugs** — disabled button still clickable, form submits with invalid state, optimistic UI never rolled back on error
 
-Cite **file + line or hunk** when reporting a likely bug. Separate **confirmed defect** from **suspected** (needs manual repro). Confirmed bugs in touched code → **Not ready** unless user accepts the risk.
+Cite **file + line or hunk** when reporting a likely bug. Confirmed defects → **Blocking**. Suspected issues needing repro → **Verify**.
 
 ### 5. Edge cases and error paths
 
@@ -146,15 +160,19 @@ For each changed flow, ask:
 - Query cache: stale data after mutation — are the right keys invalidated?
 - Env misconfiguration (`VITE_*` missing in deploy)
 
+Document in **Technical assessment → Edge cases**. New gaps → **Blocking** or **Verify**.
+
 ### 6. Regression / existing features
 
 - What **existing routes or hooks** import or depend on changed modules?
 - Did we change shared types/schemas without updating all consumers?
 - Do changes assume a user role or route context that does not always apply?
 
+Document in **Technical assessment → Regression risks**.
+
 ### 7. Critical paths
 
-Pay extra attention when the diff touches areas **critical for this product** (adapt to the app), for example:
+Pay extra attention when the diff touches areas **critical for this product**, for example:
 
 | Area                            | Risk                                              |
 | ------------------------------- | ------------------------------------------------- |
@@ -164,7 +182,7 @@ Pay extra attention when the diff touches areas **critical for this product** (a
 | High-traffic routes / wizards   | Multi-step state, validation, API contract        |
 | Zustand drafts + TanStack Query | Stale UI after save or navigation                 |
 
-Cite **N/A** when the diff does not touch relevant flows.
+Cite **N/A** when the diff does not touch relevant flows. Document in **Technical assessment → Critical paths**.
 
 ### 8. Cursor rules compliance (required)
 
@@ -192,7 +210,7 @@ Cite **N/A** when the diff does not touch relevant flows.
 | `ui/interaction-polish.mdc`           | Acknowledge actions; no uppercase tracking-widest eyebrows on every section; `prefers-reduced-motion` respected                                                                              |
 | `ui/performance.mdc`                  | `React.lazy` + `Suspense` per route when 3+ page modules                                                                                                                                     |
 
-**UI / Impeccable-style gate (when diff touches `src/pages`, `src/components`, `src/layouts`):**
+**UI gate (when diff touches `src/pages`, `src/components`, `src/layouts`):**
 
 | Dimension     | Block if                                                                                                                                 |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
@@ -202,11 +220,11 @@ Cite **N/A** when the diff does not touch relevant flows.
 | Theming       | `slate-*` / `bg-white` / `emerald-*` in components; dark mode broken on changed surfaces                                                 |
 | Anti-patterns | Repeated `uppercase tracking-widest` section kickers                                                                                     |
 
-In the verdict: **Pass** or **Fail** — list each violation with **rule file + path**; treat as **blocking** unless the user explicitly defers.
+In the report: summarize **Pass** or **Fail** first with highlights; violations → **Blocking** unless the user explicitly defers. Put the detailed checklist under **Technical assessment → Cursor rules**.
 
 ### 9. Tests and verification (local only — do not check PR CI)
 
-**Do not** check GitHub PR CI status. Do not run `gh pr checks`, poll GitHub Actions, or wait for Vercel deploy results.
+**Do not** check GitHub PR CI status. Do not run `gh pr checks`, poll GitHub Actions, or wait for deploy results.
 
 Run the full local CI mirror when the diff is not trivially docs-only:
 
@@ -221,74 +239,190 @@ pnpm format:check
 pnpm lint
 ```
 
-Per `vitest-testing.mdc`: new/changed modules should have matching tests under `src/test/`. Flag missing tests for non-trivial logic.
+Failed `pnpm verify` → **Blocking**. Per `vitest-testing.mdc`: flag missing tests for non-trivial logic.
 
-### 10. Verdict (required format)
+### 10–11. Output (required format)
 
-Lead with **what changed since last review**, then **what still blocks merge**, then **what is left but non-blocking**.
+Lead with **scope and decision**, then **evidence**. Follow the writing tone above.
 
-| Verdict                | When                                                                                         |
-| ---------------------- | -------------------------------------------------------------------------------------------- |
-| **Ready to merge**     | `### Blocking` is empty (or only **Verify** items you explicitly accept as pre-merge checks) |
-| **Ready with caveats** | No code **Blocking** items; **Verify** or **Follow-up** under Remaining                      |
-| **Not ready to merge** | One or more **Blocking** items or failed local verification                                  |
+#### Verdict rules
+
+| Verdict                | Emoji | When                                                                    |
+| ---------------------- | ----- | ----------------------------------------------------------------------- |
+| **Ready to merge**     | 🟢    | No **Blocking** items; optional **Verify** only if user accepts skipping |
+| **Ready with caveats** | 🟡    | No code **Blocking** items; one or more **Verify** before merge           |
+| **Not ready to merge** | 🔴    | One or more **Blocking** items or failed local verification             |
+
+#### Confidence (evidence-based — do not default to High)
+
+State confidence **after Reason**, and justify it from observed evidence. Weigh:
+
+- **Verify status** — did `pnpm verify` pass locally?
+- **Tests** — new/changed tests for touched logic?
+- **Review coverage** — how much of the diff was read; any blind spots?
+- **Production validation** — has behavior been checked in staging/production?
+- **Architectural complexity** — isolated change vs cross-cutting refactor
+
+Example: *Confidence: High — `pnpm verify` passed with 8 new tests in `SearchOpportunitiesPanel.test.tsx`; change scoped to brands feature; no manual 320px check yet.*
+
+Do **not** assign High or Very high without citing at least two evidence factors.
+
+#### Recommendation (conditional)
+
+Include **## Recommendation** only when a **specific action** is required that is not already clear from Verdict + Reason + Overall (e.g. "fix `brands.service.ts` line 42 before merge"). **Omit entirely** when Verdict/Reason/Overall already state the merge stance — avoid repeating "merge after verifying X."
 
 ```markdown
-## Merge readiness
+# Merge readiness
 
-**Verdict: Ready to merge** | **Ready with caveats** | **Not ready to merge**
+## Scope
 
-### At a glance
+**Area:** Backend only | Frontend only | Full stack | Docs/skills only
 
-|                                | Count |
-| ------------------------------ | ----- |
-| Resolved (this pass)           | N     |
-| Blocking                       | N     |
-| Remaining (verify + follow-up) | N     |
+**Touched:** N modules — (list key paths)
 
-### Summary
-
-(2–3 sentences — verdict in plain language)
-
-### Resolved
-
-<!-- First review: "None — first review." -->
-
-### Blocking
-
-<!-- Empty → "None." -->
-
-### Remaining
-
-#### Verify before / after merge
-
-#### Follow-up (optional)
+**Not touched:** (e.g. no auth changes, no `src/api/client.ts` changes, no shared schema drift, no other feature routes)
 
 ---
 
-### Dimensional review
+## Verdict
 
-<!-- Do NOT duplicate Blocking/Remaining items here. "No impact." when nothing to say. -->
+🟢 Ready to merge | 🟡 Ready with caveats | 🔴 Not ready to merge
 
-#### Edge cases & gaps
+### Reason
 
-#### Critical paths
+(One paragraph: why you arrived at this verdict. Connect blocking/verify state, verify results, isolation, contract stability, and whether remaining work is code fix vs manual check.)
 
-#### Breaking changes
+### Confidence
 
-#### Regression risks
+Very high | High | Medium | Low — (cite evidence factors; do not pick a label without justification)
 
-#### Cursor rules compliance
+### Review summary
 
-### Verification done
+|                         | Count |
+| ----------------------- | ----- |
+| Files reviewed          | N     |
+| Modules touched         | N     |
+| Potential bugs found    | N     |
+| Blocking issues         | N     |
+| Manual verification     | N     |
+| Cursor rule violations  | N     |
+| Tests added (in diff)   | N     |
 
-- [ ] `pnpm verify` — pass / fail / not run (docs-only: `format:check` + `lint` minimum)
-- PR CI status — **not checked**
+---
+
+## Executive review
+
+### Overall
+
+(2–4 sentences. State whether you would merge, what feels solid, and what — if anything — still needs attention. On re-review, note what improved.)
+
+### Merge impact
+
+| Dimension            | Level (Low / Low–Medium / Medium / High) | Notes |
+| -------------------- | ---------------------------------------- | ----- |
+| User impact          |                                          |       |
+| Deployment risk      |                                          |       |
+| Rollback difficulty  |                                          |       |
+| Regression risk      |                                          |       |
+
+### ✅ What's great
+
+<!-- Objective outcomes ONLY. Every bullet must be verifiable from diff or verify. -->
+<!-- Do not invent praise. Omit bullets that lack direct evidence. -->
+<!-- Examples: pnpm verify passed; 8 tests added in SearchOpportunitiesPanel.test.tsx; no a11y violations on changed inputs; query keys invalidated after mutation -->
+
+- …
+
+### ❤️ Things I loved
+
+<!-- OPTIONAL — engineering craftsmanship ONLY. Omit entire subsection when nothing noteworthy. -->
+<!-- Never repeat What's great bullets. No outcomes here (no "tests added", "verify passed"). -->
+<!-- Examples: colocated hook extracted from page shell; mutation invalidation centralized in feature API module -->
+
+- …
+
+### ⚠️ Only a few things I'd still check
+
+<!-- Canonical home for Verify and Follow-up. Checks/smoke tests/staging — not code tweaks. -->
+<!-- Use "None." when clean. -->
+
+#### Before merging
+
+- …
+
+#### After merging
+
+- …
+
+### Biggest remaining risk
+
+(One sentence: if this PR fails in production, this is probably why. Be specific.)
+
+---
+
+## Technical assessment
+
+### Blocking
+
+<!-- Empty → None. Confirmed defects and failed verify only. -->
+
+### Resolved
+
+<!-- RE-REVIEW ONLY — omit this entire subsection on first review. -->
+
+### Remaining
+
+See **Executive review → Only a few things I'd still check**. Do not duplicate bullets here.
+
+### Edge cases
+
+### Critical paths
+
+### Breaking changes
+
+### Regression risks
+
+### Cursor rules
+
+**Pass** | **Fail**
+
+**Highlights**
+
+- …
+
+<details>
+<summary>Detailed checklist</summary>
+
+| Rule | Result | Notes |
+| ---- | ------ | ----- |
+| …    | Pass/Fail/N/A | … |
+
+</details>
+
+---
+
+## Verification
+
+- `pnpm verify` — ✅ pass | ❌ fail | not run (docs-only: `format:check` + `lint` minimum)
+- PR CI — **not checked** (by design)
+
+---
+
+## Recommendation
+
+<!-- OPTIONAL — include only when a concrete action is needed beyond what Verdict/Reason/Overall already say. Otherwise omit this entire section. -->
+
+(Specific next step — e.g. fix file X, run migration Y. Do not restate the verdict.)
 ```
 
 **Formatting rules**
 
-- **Resolved / Blocking / Remaining** are the only places for actionable findings. Do not list the same issue twice.
-- **Dimensional review** is for scope context — not a second bug list.
-- First review: `### Resolved` → `None — first review.`
-- Be direct. Do not say "looks good" without evidence from diff and searches.
+- **Scope** comes first — reader knows what areas are in/out before the verdict.
+- **Verdict order:** emoji verdict → **Reason** → **Confidence** (why before how confident).
+- **What's great** = objective outcomes; **Things I loved** = craft only; **never overlap**.
+- **Do not invent praise** — omit unsupported bullets in either positive section.
+- **Verify** / **Follow-up** live only under **Only a few things I'd still check** — not duplicated under Remaining.
+- **Biggest remaining risk** — one sentence, always include (even when risk is low).
+- **Recommendation** — omit when redundant with Overall/Reason.
+- **Technical assessment** subsections provide evidence — do not repeat Blocking bullets or executive check lists.
+- Use emoji verdict indicators (🟢/🟡/🔴) consistently.
